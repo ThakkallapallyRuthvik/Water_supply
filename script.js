@@ -4,6 +4,7 @@
 let map;
 let markers = [];
 let coordinates=[];
+let line;
 
 function initMap() {
   const loc = { lat: 17.39763609879129, lng: 78.49017952657705 };       //17.39763609879129, 78.49017952657705
@@ -28,9 +29,12 @@ function initMap() {
   document
     .getElementById("delete-markers")
     .addEventListener("click", deleteMarkers);
+  // document
+  //   .getElementById("delete-latest-marker")
+  //   .addEventListener("click", deleteLatestMarker);
   document
-    .getElementById("delete-latest-marker")
-    .addEventListener("click", deleteLatestMarker);
+    .getElementById("delete-latest-line")
+    .addEventListener("click", deleteLatestLine);
   // Adds a marker at the center of the map.
   const origin = new google.maps.Marker({
     position:loc,
@@ -42,7 +46,11 @@ function initMap() {
 //Draw line between markers
 function drawLine(coordinates)
 {
-  const line=new google.maps.Polyline({
+  if(line!=null)
+  {
+    line.setMap(null);
+  }
+  line=new google.maps.Polyline({
     path:coordinates,
     geodesic:true,
     strokeColor:"Blue",
@@ -50,6 +58,16 @@ function drawLine(coordinates)
   });
   line.setMap(map);
 }
+
+function deleteLatestLine()
+{
+  deleteLatestMarker();
+  line.setMap(null);
+  coordinates.pop();
+  drawLine(coordinates);
+
+}
+
 // Adds a marker to the map and push to the array.
 function addMarker(position) {
   const marker = new google.maps.Marker({
@@ -89,5 +107,7 @@ function deleteLatestMarker()
   markers.pop();
   setMapOnAll(map);
 }
+
+
 
 window.initMap = initMap;
