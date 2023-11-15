@@ -26,9 +26,9 @@ function initMap() {
   document
     .getElementById("hide-markers")
     .addEventListener("click", hideMarkers);
-  document
-    .getElementById("delete-markers")
-    .addEventListener("click", deleteMarkers);
+  // document
+  //   .getElementById("delete-markers")
+  //   .addEventListener("click", deleteMarkers);
   // document
   //   .getElementById("delete-latest-marker")
   //   .addEventListener("click", deleteLatestMarker);
