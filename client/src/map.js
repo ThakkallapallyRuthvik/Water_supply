@@ -1,7 +1,6 @@
 import {React,useState,useEffect} from 'react';
 import { useJsApiLoader, GoogleMap, Marker, Polyline, InfoWindow } from "@react-google-maps/api";
 import {Flex,Box,HStack,Text,Button,ButtonGroup,Input} from "@chakra-ui/react";
-// import {AdvancedMarker,Pin} from '@vis.gl/react-google-maps' 
 
 
 
