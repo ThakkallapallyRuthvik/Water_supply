@@ -16,6 +16,7 @@ function App()
     const [showMarkers, setShowMarkers] = useState(true)
     const [ center, setCenter] = useState(origin)
     const [ selectedMarker, setSelectedMarker] = useState(null)
+    const [ defaultcoordinates, setDefaultCoordinates] = useState([])
 
 
     function addMarker(pos){
@@ -28,7 +29,7 @@ function App()
     }
 
     function deleteLastLine(){
-        if (coordinates.length > 0){
+        if (coordinates.length > 0 && coordinates.length > defaultcoordinates.length){
             const newCoordinates = [...coordinates]
             newCoordinates.pop()
             setCoordinates(newCoordinates)
@@ -50,7 +51,8 @@ function App()
             });
             const data = await response.json();
             console.log(data)
-            setCoordinates(data);
+            setCoordinates(data)
+            setDefaultCoordinates(data)
           } catch (error) {
             console.error(error);
           }
