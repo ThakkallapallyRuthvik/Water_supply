@@ -1,5 +1,5 @@
 import {React,useState,useEffect} from 'react';
-import { useJsApiLoader, GoogleMap, Marker, Polyline } from "@react-google-maps/api";
+import { useJsApiLoader, GoogleMap, Marker, Polyline, InfoWindow } from "@react-google-maps/api";
 import {Flex,Box,HStack,Text,Button,ButtonGroup,Input} from "@chakra-ui/react";
 // import {AdvancedMarker,Pin} from '@vis.gl/react-google-maps' 
 
@@ -14,14 +14,29 @@ function App()
     const [ map, setMap] = useState('')
     const [coordinates, setCoordinates] = useState([])
     const [showMarkers, setShowMarkers] = useState(true)
+    const [ center, setCenter] = useState(origin)
+    const [ selectedMarker, setSelectedMarker] = useState(null)
+
 
     function addMarker(pos){
         setCoordinates((prevCoordinates) => [...prevCoordinates, pos]);
-        return <Marker position={pos}/>
+        
     }
 
     function toggleMarkerVisibility() {
         setShowMarkers((prevVisibility) => !prevVisibility);
+    }
+
+    function deleteLastLine(){
+        if (coordinates.length > 0){
+            const newCoordinates = [...coordinates]
+            newCoordinates.pop()
+            setCoordinates(newCoordinates)
+        }
+    }
+
+    const markerIndex = (index) => {
+        setSelectedMarker(index)
     }
 
     useEffect(() => {
@@ -77,28 +92,49 @@ function App()
         <Box position='absolute' left={0} top={80} h="100%" w="100%" >
             {/* Google Map */}
             <GoogleMap 
-            center={origin} 
+            center={center} 
             zoom={15}
             mapContainerStyle={{width:"80%", height:"80%",left:"150px",top:"0"}}
+            options={{
+                streetViewControl:false,
+                mapTypeControl:false,
+                fullscreenControl:false,
+                clickableIcons:false,
+                styles:[
+                    {
+                        featureType:"poi",
+                        elementType:"labels",
+                        stylers:[{visibility:"off"}],
+                    },
+                ]
+            }}
             onLoad={(map) => setMap(map) }
             onClick={(event) => addMarker(event.latLng)}>
 
-            <div>
-                {coordinates && coordinates.map((coordinate, index) => (
-                    <div key={index}>
-                    Latitude: {coordinate.lat}, Longitude: {coordinate.lng}
-                    </div>
-                ))}
-                </div>
 
             {/* Displaying markers */}
-            {showMarkers && map && <Marker position={origin} />}
+            {/* {showMarkers && map && <Marker position={origin} />} */}
             {showMarkers && coordinates.map((coordinate, index) => (
-                <Marker key={index} position={coordinate} />
+                <Marker key={index} position={coordinate} onClick={() => markerIndex(index)} />
             ))}
-
+            
             {/* Draw polyline */}
             {coordinates.length>1 && <Polyline path={coordinates}/>}
+
+            {/* Display InfoWindow when a marker is selected */}
+            {selectedMarker !== null && (
+                <InfoWindow
+                position={coordinates[selectedMarker]}
+                onCloseClick={() => setSelectedMarker(null)} // Close InfoWindow when clicked
+                >
+                {/* Add your content for the InfoWindow */}
+                <div>
+                    <h3>Marker Information</h3>
+                    <p>You have selected marker number {selectedMarker}</p>
+                </div>
+                </InfoWindow>
+            )}
+
 
             </GoogleMap> 
             </Box>
@@ -119,12 +155,16 @@ function App()
         >
         <HStack spacing={4}>
         <ButtonGroup height="100%">
-            <Button bgColor="white" position={"absolute"} type="button" height="50%"
+            <Button bgColor="white" position="absolute" type="button" height="50%"
              width="30%" onClick={toggleMarkerVisibility}>
             {showMarkers ? 'Hide Markers' : 'Show Markers'}
             </Button>
             <Button bgColor="white" position="absolute" type="submit" 
-            left="30%" height="50%" width="30%" onClick={submitCoordinates}>
+            left="30%" height="50%" width="30%" onClick={deleteLastLine}>
+            Delete last line
+            </Button>
+            <Button bgColor="white" position="absolute" type="submit" 
+            left="61%" height="50%" width="30%" onClick={submitCoordinates}>
             Submit
             </Button>
         </ButtonGroup>
