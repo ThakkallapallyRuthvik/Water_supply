@@ -20,7 +20,8 @@ function App()
     })
 
     const data = await response.json()
-    if(data.user)
+    console.log(data)
+    if(data.data)
     {
         alert("Login successful")
         window.location.href='/map'
