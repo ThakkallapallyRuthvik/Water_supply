@@ -23,7 +23,8 @@ function App()
     })
 
     const data = await response.json()
-    if (data)
+    console.log(data)
+    if (data.data)
     {
       alert("Registration succesful! Redirecting to login page")
       window.location.href="/login"
