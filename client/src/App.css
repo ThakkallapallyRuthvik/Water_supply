@@ -8,6 +8,11 @@ html {
     background: #243b55; 
     /* linear-gradient(#141e30, #243b55) */
   }
+
+  .map{
+    position: absolute;
+    background: white;
+  }
   
   .login-box {
     position: absolute;
