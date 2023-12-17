@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import Login from './Login';                //always use first letter in uppercase
 import Register from './Register';
 import Map from './map';  
-import './App.css';
+// import './App.css';
 
 
 const App = () => {
