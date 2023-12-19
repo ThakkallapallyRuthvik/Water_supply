@@ -74,9 +74,9 @@ function App()
         
           setCoordinates((prevCoordinates) => {
             const lastLineIndex = prevCoordinates.length - 1;
-            if (lastLineIndex < 0) {
-              return [];
-            }
+            // if (lastLineIndex < 0) {        //only useful if there are no elements in the coordinates array
+            //   return [];
+            // }
         
             const lastLine = prevCoordinates[lastLineIndex];
             const updatedCoordinates = [...prevCoordinates];
