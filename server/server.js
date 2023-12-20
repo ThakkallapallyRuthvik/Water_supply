@@ -22,7 +22,25 @@ app.post("/api/register", async (req, res) => {
         status: "FAILED",
         message: "Empty input fields!",
       });
-    }
+    }else if (!/^[a-zA-Z]*$/.test(name)) {
+      return res.json({
+          status: "FAILED",
+          message: "Invalid name entered"
+      });
+  } 
+  else if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,4})+$/.test(email)) {
+      return res.json({
+          status: "FAILED",
+          message: "Invalid email entered"
+      });
+  } 
+  else if (typeof pass !== 'string' || pass.length <= 6 || pass.length >= 15) {
+      // password validation
+      return res.json({
+          status: "FAILED",
+          message: "Password is too short!"
+        });
+  }
   
     try {
       // Checking if user already exists
@@ -54,9 +72,7 @@ app.post("/api/register", async (req, res) => {
         email,
         pass: hashedPassword
       });
-  
-      
-  
+
       res.json({
         status: "SUCCESS",
         message: "Sign up successful",
@@ -125,7 +141,8 @@ app.post("/api/register", async (req, res) => {
       })
       const coord = await Coordinates.create({
           "_id":"6560b0c0c0a53e4fadc0d420",
-          coordinates:req.body.coordinates
+          coordinates:req.body.coordinates,
+          housecoords:req.body.housecoords,
       })
 
       if(coord){
@@ -136,10 +153,10 @@ app.post("/api/register", async (req, res) => {
       }
   })
 
-  app.post("/api/import",async(req,res) =>{
+  app.post("/api/default",async(req,res) =>{
       const coord = await Coordinates.findOne();
       if(coord){
-          return res.json(coord.coordinates)
+          return res.json({coordinates:coord.coordinates,housecoords:coord.housecoords})
       }
       else{
           return res.json({status:'error coords not imported'})
