@@ -4,7 +4,7 @@ import './App.css'
 function App()
 {
   const [name, setName] = useState('')
-  const [pass, setPass] = useState('')
+  const [password, setPassword] = useState('')
   const [email, setEmail] = useState('')
 
   async function registerUser(event)
@@ -18,7 +18,7 @@ function App()
       body: JSON.stringify({
         name,
         email,
-        pass,
+        password,
       }),
     })
 
@@ -57,8 +57,8 @@ function App()
         {/* <label style={{color:'Powderblue'}}>Password</label> */}
         <div className='user-box'>
         <input
-          value={pass}
-          onChange = {(e) => setPass(e.target.value)}
+          value={password}
+          onChange = {(e) => setPassword(e.target.value)}
           type='password' placeholder='Password'/>               {/* '/' implies </input> */}
         </div>
         <br>

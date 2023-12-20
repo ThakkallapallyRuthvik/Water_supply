@@ -3,8 +3,8 @@ import './App.css'
 
 function App()
 {
-  const [name, setName] = useState('')
-  const [pass, setPass] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
 
   async function loginUser(event)
   {
@@ -15,8 +15,8 @@ function App()
         'Content-Type':'application/json',
       },
       body: JSON.stringify({
-        name,
-        pass
+        email,
+        password
       }),
     })
 
@@ -41,18 +41,18 @@ function App()
         <br/>
         <div className='user-box'>
         <input 
-          value={name}
-          onChange = {(e) => setName(e.target.value)}
-          type='text' 
-          placeholder='Username'></input>
+          value={email}
+          onChange = {(e) => setEmail(e.target.value)}
+          type='email' 
+          placeholder='Email'></input>
         <br/>
         </div>
         {/* <label style={{color:'Powderblue'}}>Password</label> */}
         <br/>
         <div className='user-box'>
         <input
-          value={pass}
-          onChange = {(e) => setPass(e.target.value)}
+          value={password}
+          onChange = {(e) => setPassword(e.target.value)}
           type='password' placeholder='Password'/>               {/* '/' implies </input> */}
         </div>
         <br>
