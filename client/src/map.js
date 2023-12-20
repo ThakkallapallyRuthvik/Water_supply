@@ -74,7 +74,7 @@ function App()
         
           setCoordinates((prevCoordinates) => {
             const lastLineIndex = prevCoordinates.length - 1;
-            // if (lastLineIndex < 0) {        //only useful if there are no elements in the coordinates array
+            // if (lastLineIndex < 0) {         //only useful if there are no elements in the coordinates array
             //   return [];
             // }
         
@@ -186,7 +186,7 @@ function App()
 
             {/* Draw default polyline */}    
             {showMarkers && defaultcoordinates.map((lineArray,lineIndex) => (
-                <Polyline path={lineArray} key={lineIndex} options={{strokeColor:"deepskyblue",strokeOpacity:1}} />
+                <Polyline path={lineArray} key={lineIndex} options={{strokeColor:"deepskyblue",strokeOpacity:1,geodesic:true}} />
             ))}
 
             {/* Draw users polylines */}    

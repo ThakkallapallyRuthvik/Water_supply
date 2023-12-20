@@ -15,7 +15,7 @@ const App = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/map" element={<Map/>}/>
           {/* Add a default route for the root path */}
-          <Route path="/" element={<Navigate to="/register" />} />
+          <Route path="/" element={<Register />} />
         </Routes>
       </Router>
     </div>
