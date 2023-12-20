@@ -1,61 +1,14 @@
-const mongoose =  require('mongoose')
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-const User = new mongoose.Schema(
-    {
-        name:{type:String,required:true,unique:true},
-        email:{type:String,required:true,unique:true},
-        pass:{type:String,required:true},
-    },
-        {collection:'user-data'}
-)
+const UserSchema = new Schema({
+    name: String,
+    email: String,
+    password: String,
+    verified : Boolean
+});
 
-const model = mongoose.model('DataOfUsers',User)
+const User = mongoose.model('User',UserSchema);
 
-module.exports = model
+module.exports = User;
 
-// const mongoose = require('mongoose');
-
-// const userSchema = new mongoose.Schema(
-//   {
-//     name: {
-//       type: String,
-//       required: true,
-//       unique: true,
-//       minlength: 8,
-//       maxlength: 16,
-//       match: /^[a-zA-Z0-9_-]+$/,
-//     },
-//     pass: {
-//       type: String,
-//       required: true,
-//       minlength: 8,
-//       validate: {
-//         validator: function (value) {
-//           return /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/.test(value);
-//         },
-//         message: 'Password does not meet the requirements.',
-//       },
-//     },
-//   },
-//   { collection: 'user-data' }
-// );
-
-// const User = mongoose.model('DataOfUsers', userSchema);
-
-// // Example usage
-// const newUser = new User({
-//   name: 'exampleUser',
-//   pass: 'InvalidPassword123!',
-// });
-
-// newUser.save((error) => {
-//   if (error) {
-//     console.error('Error saving user:', error.message);
-//   } else {
-//     console.log('User saved successfully.');
-//   }
-//   mongoose.disconnect();
-// });
-
-// const model = mongoose.model('DataofUsers',userSchema)
-// module.exports = model
