@@ -38,7 +38,7 @@ transporter.verify((error, success) => {
 
 //signup
 app.post("/api/register", async (req, res) => {
-  let { name, email, password } = req.body;
+  let { name, email, password, role } = req.body;
   if (name === "" || password === "" || email === "" ) {
       return res.json({
           status: "FAILED",
@@ -54,12 +54,17 @@ app.post("/api/register", async (req, res) => {
           status: "FAILED",
           message: "Invalid email entered"
       });
-  }  else if (password.length < 8) {
+  }  else if (password.length < 6) {
       // password validation
       res.json({
           status: "FAILED",
           message: "Password is too short!"
       });
+  }else if( role==''){
+    res.json({
+        status:"FAILED",
+        message:"Select your role!"
+    })
   }else {
     // Checking if user already exists
     User.findOne({ email }).then(result => {
@@ -79,6 +84,7 @@ app.post("/api/register", async (req, res) => {
                     name,
                     email,
                     password: hashedPassword,
+                    role,
                     verified: false,
                 });
                 newUser
@@ -348,6 +354,80 @@ if (!email || !password) {
 
   });
   
+
+  const sendResetEmail = ({_id,email},redirectUrl,res) =>{
+    const resetString = uuidv4 + _id;
+
+    PasswordReset
+    .deleteMany({userID : _id})
+    .then(result => {
+        //reset record deleted
+        //sending the email
+        const mailOptions = {
+            from: process.env.AUTH_EMAIL,
+            to: email,
+            subject: "Reset your password",
+            html: `<p>To reset your password , use the link below</p>
+            <p>This link <b>expires in 1 hour</b>.</p>
+            <p>press <a href=${redirectUrl +  _id + "/" + resetString}>here</a>to proceed.</p>`,
+        };
+
+        //hash the reset strng
+        const saltRounds = 10;
+        bcrypt
+        .hash(resetString , saltRounds)
+        .then(hashedResetString =>{
+            //password reset collection
+            const newPasswordReset = new PasswordReset({
+                userID : _id,
+                resetString : hashedResetString,
+                createdAT : Date.now(),
+                expiredAT : Date.now() + 3600000
+            });
+            newPasswordReset
+            .save()
+            .then(() =>{
+                transporter
+                .sendMail(mailOptions)
+                .then(() => {
+                    // reset email sent
+                    res.json({
+                        status : "PENDING",
+                        message : "Password reset mail sent"
+                    })
+                })
+                .catch(error => {
+                    console.log(error);
+                    res.json({
+                        status: "FAILED",
+                        message: "Password reset email failed!"
+                    });
+                })
+            })
+            .catch(error => {
+                console.log(error);
+                res.json({
+                    status: "FAILED",
+                    message: "Could not save password reset data!"
+                });
+            })
+        })
+        .catch(error =>{
+            console.log(error);
+            res.json({
+                status: "FAILED",
+                message: "An error occurred while hashing password reset string"
+            })
+        })
+    })
+    .catch(error => {
+        res.json({
+            status: "FAILED",
+            message: "Cleaing exisiting passsowrd reset record failed"
+        });
+    })
+}
+
   app.post("/api/map",async(req,res) =>{
       const del = await Coordinates.deleteOne({
           "_id":"6560b0c0c0a53e4fadc0d420"
@@ -379,3 +459,4 @@ if (!email || !password) {
   app.listen(5000, () => {
       console.log("Server started on port 5000");
   })
+
