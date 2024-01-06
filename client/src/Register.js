@@ -10,7 +10,8 @@ function App()
   const [ role, setRole ] = useState('')
   const [ isModalOpen, setIsModalOpen ] = useState(false)
   const [ modalContent, setModalContent ] = useState({})
-
+  const [ otp, setOtp ] = useState('')
+  const [ disable, setDisable ] = useState(false)
 
   const openModal = (header, body) => {
     if (header == "FAILED"){
@@ -31,12 +32,41 @@ function App()
     // Automatically close the modal after 2 seconds
     setTimeout(() => {
       if(header=='PENDING'){
-        window.location.href="/login"
+        setDisable(true)
+        // window.location.href="/login"
+      }
+      else if(header=='SUCCESS'){
+        window.location.href='/login'
       }
       setIsModalOpen(false);
     }, 2000);
   };
 
+
+
+  async function sendotp(event){
+    event.preventDefault()
+    const response = await fetch('http://localhost:5000/verifyotp',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+      },
+      body:JSON.stringify({
+        email,
+        otp
+      })
+    })
+
+    const data = await response.json()
+    console.log(data)
+    if (data.data)
+    {
+      openModal(data.status,data.message)
+    }
+    else{
+      openModal(data.status,data.message)
+    }
+  }
 
   async function registerUser(event)
   {
@@ -67,7 +97,7 @@ function App()
   }
 
   return(
-    <form onSubmit={registerUser} className='registration-form'>
+    <form onSubmit={sendotp}> 
     <div className='login-box'>
       <h1 style={{textAlign:'center',color:"Aqua"}}>Register</h1>
       {/* <label style={{color:'Powderblue'}}>Username</label> */}
@@ -105,14 +135,23 @@ function App()
         </div>
         <br>
         </br>
+        <button onClick={registerUser} style={{width:'100%',height:'30px'}} >Get OTP</button>
         <br/>
-        <input type='submit' value='Register'/>
+        <br/>
+        <input type='text' value={otp} 
+        onChange={(e) => setOtp(e.target.value)}
+        placeholder='Enter OTP' 
+        disabled={disable?false:true}
+        />
+        <br/>
+        <br/>
+        <input type='submit' value='Register' />
     </div>
     <div className='modal-box'>
     <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} blockScrollOnMount={false}>
         <ModalOverlay />
-            <ModalContent bg="white" border={modalContent.border} borderRadius="5px" p={4} top={65} left="42%" boxSize="15%">
-                <ModalHeader>{modalContent.header}</ModalHeader>
+            <ModalContent bg="white" border={modalContent.border} borderRadius="5px" p={4} top={40} left="41%" boxSize="18%">
+                <ModalHeader style={{marginLeft:45}}>{modalContent.header}</ModalHeader>
                 {/* <ModalCloseButton width={10} left="50%" /> */}
                 <ModalBody>
                     {modalContent.body}

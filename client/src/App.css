@@ -4,7 +4,7 @@ html {
   body {
     margin:0;
     padding:0;
-    font-family: sans-serif;
+    font-family: 'Titillium Web', sans-serif;
     background: #243b55; 
     /* linear-gradient(#141e30, #243b55) */
   }
@@ -19,14 +19,7 @@ html {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 10;
-  }
-
-  .registration-form {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    z-index: 1;
   }
   
   .login-box {
@@ -102,6 +95,23 @@ html {
     color: #68dceb;
   }
   
+  button[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    text-align: center;
+    cursor: pointer;
+    background: #68dceb;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    outline: none;
+  }
+  
+  button[type="submit"]:hover {
+    background: #fff;
+    color: #68dceb;
+  }
   
   :root{
     --bg: #242526;
@@ -118,10 +128,10 @@ ul{
     margin:0;
     padding:0;
 }
-a{
+/* a{
     color:var(--text-color);
     text-decoration:none;
-}
+} */
 .navbar{
     height:var(--nav-size);
     background-color:var(--bg);

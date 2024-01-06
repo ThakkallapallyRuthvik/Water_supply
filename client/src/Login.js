@@ -1,4 +1,5 @@
 import React,{useState, useEffect} from 'react'
+import {Link} from 'react-router-dom'
 import {Flex,Box,HStack,Button,ButtonGroup,Modal,ModalOverlay,ModalContent,ModalHeader,ModalBody,ModalCloseButton, Center} from "@chakra-ui/react";
 import './App.css'
 
@@ -114,12 +115,15 @@ function App()
         <br>
         </br>
         <input type='submit' value='Login'/>
+        <br/>
+        <br/>
+        <Link to="/requestPasswordReset" style={{marginLeft:90}}>Forgot Password?</Link>
     </div>
     <div className='modal-box'>
     <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} blockScrollOnMount={false}>
         <ModalOverlay />
-            <ModalContent bg="white" border={modalContent.border} borderRadius="5px" p={4} top={75} left="42%" boxSize="15%">
-                <ModalHeader>{modalContent.header}</ModalHeader>
+            <ModalContent bg="white" border={modalContent.border} borderRadius="5px" p={4} top={60} left="41%" boxSize="18%">
+                <ModalHeader style={{marginLeft:60}}>{modalContent.header}</ModalHeader>
                 {/* <ModalCloseButton width={10} left="50%" /> */}
                 <ModalBody>
                     {modalContent.body}

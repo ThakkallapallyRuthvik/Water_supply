@@ -6,6 +6,9 @@ import Map from './map';
 import Navbar from './navbar';
 import MapDept from './mapDept';
 import MapCust from './mapCust';
+import RequestPasswordReset from './requestPasswordReset';
+import ResetPassword from './resetPassword';
+import Test from './test2';
 
 
 const App = () => {
@@ -13,12 +16,15 @@ const App = () => {
     <div>
       <Router>
         <Routes>
+
+          <Route path="/test" element={<Test />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/map" element={<Map/>}/>
           <Route path="/mapDepartment" element={<MapDept/>} />
           <Route path="/mapCustomer" element={<MapCust/>} />
-          <Route path="/navbar" element={<Navbar />} />
+          <Route path='/requestPasswordReset' element={<RequestPasswordReset/>} />
+          <Route path='/resetPassword' element={<ResetPassword/>} />
           {/* Add a default route for the root path */}
           <Route path="/" element={<Register />} />
         </Routes>
