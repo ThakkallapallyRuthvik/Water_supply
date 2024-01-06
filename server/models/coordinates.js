@@ -4,6 +4,7 @@ const coordinates = new mongoose.Schema(
     {
         coordinates:{type:Array,required:true},
         housecoords:{type:Array,required:true},
+        junctions:{type:Array,required:true}
     },
     {collection:'coordinatesDB'}
 )
