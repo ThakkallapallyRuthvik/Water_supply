@@ -39,10 +39,12 @@ transporter.verify((error, success) => {
   }
 });
 
+let ID;
 //signup
 app.post("/api/register", async (req, res) => {
-  let { name, email, password, role } = req.body;
-  if (name === "" || password === "" || email === "" ) {
+  ID = uuidv4().slice(0,7);
+  let { name, email, password, role, add } = req.body;
+  if (name === "" || password === "" || email === "" || add === "" ) {
       return res.json({
           status: "FAILED",
           message: "Empty credentials supplied!"
@@ -84,11 +86,14 @@ app.post("/api/register", async (req, res) => {
             const saltRounds = 10;
             bcrypt.hash(password, saltRounds).then(hashedPassword => {
                 const newUser = new User({
+                    ID,
                     name,
                     email,
                     password: hashedPassword,
                     role,
                     verified: false,
+                    add,
+                    houseAlloted:false,
                 });
                 newUser
                     .save()
@@ -149,7 +154,6 @@ const sendOTP = async ({ _id , email}, res) =>{
             status : "PENDING",
             message : "OTP has been sent to your email",
             data : {
-                userID : _id,
                 email,
             },
         });
@@ -192,7 +196,7 @@ app.post("/verifyotp" , async (req,res)=>{
                     } else {
                         //Matching otp
                         await User.updateOne({ email : email}, {verified : true});
-                        Otpverification.deleteMany({ email });
+                        Otpverification.deleteOne({ otp });
                         res.json({
                             status : "SUCCESS",
                             message : "Your account has been verified successfully!",
@@ -405,6 +409,7 @@ if (!email || !password) {
                           message: "Sign in successful!",
                           data: data
                       });
+                      ID = data.ID
                   } else {
                       res.json({
                           status: "FAILED",
@@ -436,7 +441,7 @@ if (!email || !password) {
 }
 
   });
-  
+
 //password reset
 
 app.post("/requestPasswordReset", (req,res)=>{
@@ -692,14 +697,28 @@ app.post("/api/default",async(req,res) =>{
     }
 })
 
-  app.post("/api/mapCust",async(req,res) => {
+  app.post("/api/mapCust/:ID",async(req,res) => {
+    console.log("Submitted")
+    console.log(ID)
+    const {description} = req.body;
+    if (description==""){
+        res.json({
+            status:"FAILED",
+            message:"Please describe your problem"
+        })
+    }else{
     const complaints = await Complaints.create({
-        // UserID:req.body.UserID,
+        ID:ID,
         // HouseID:req.body.HouseID,
         description:req.body.description,
         datecomplained:Date.now(),
         dateresolved:Date.now()+100000,
     })
+    res.json({
+        status:"SUCCESS",
+        message:"Complaint submitted successfully"
+    })
+    }
   })
 
   app.listen(5000, () => {
