@@ -2,9 +2,22 @@ const mongoose = require('mongoose')
 
 const coordinates = new mongoose.Schema(
     {
-        coordinates:{type:Array,required:true},
-        housecoords:{type:Array,required:true},
-        junctions:{type:Array,required:true}
+        coordinates : {type:Array,required:true},
+        // housecoords : {type:Array,required:true},
+        housecoords : [{
+            CANID : { type: String, required: true },
+            hcoords : { type: Object },
+            waterSupplied : {type: Boolean },
+            assignedJunction : { type: String },
+        }],
+        // junctions : {type:Array,required:true},
+        junctions :[{
+            JID : {type: String, required:true},
+            jcoords :{type:Object},
+            houses :{type:Array},
+            waterSupplied :{type:Boolean},
+        }],
+        waterReservoirCoords : {type:Array , required:true},
     },
     {collection:'coordinatesDB'}
 )
