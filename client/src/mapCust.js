@@ -10,6 +10,7 @@ import { useRef } from "react";
 import GreenHouseMarker from './greenhousemarker.jpeg'
 import RedHouseMarker from './redhousemarker.jpeg'
 import junctionmarker from './junctionmarker.jpeg'
+import waterreservoir from './waterreservoir.jpeg'
 import bg from './components/bg.jpg'
 import './App.css'
 import './components/Navbar.css'
@@ -26,22 +27,26 @@ function App()
         libraries:MapLibraries,
     })
     const [ map, setMap] = useState('')
+    const [zoomLevel, setZoomLevel] = useState(17)
     const [coordinates, setCoordinates] = useState([])
     const [ center, setCenter] = useState(origin)
     const [searchBox, setSearchBox] = useState(null);
     const [ selectedhouseMarker, setSelectedhouseMarker] = useState(null)
     const [ selectedjunctionMarker, setSelectedjunctionMarker] = useState(null)
+    const [ selectedreservoir, setSelectedreservoir] = useState(null)
     const [ defaultcoordinates, setDefaultCoordinates ] = useState([])
     const [ housecoords, setHouseCoords ] = useState([])
     const [ defaultHouseCoords, setDefaultHouseCoords ] = useState([])
     const [ junctioncoords , setJunctionCoords] = useState([])
     const [ defaultjunctioncoords , setDefaultJunctionCoords ] = useState([])
+    const [waterReservoirCoords, setWaterReservoirCoords] = useState([])
     const [selectedHouseForJunction, setSelectedHouseForJunction] = useState(null);
     let [ subcoords, setSubCoords ] = useState([])
     const [ isModalOpen, setIsModalOpen ] = useState(false)
     const [ isSubModalOpen, setIsSubModalOpen ] = useState(false)
     const [ modalContent, setModalContent ] = useState({})
     let [ markerFunction, setMarkerFunction ] = useState(0)
+    const [waterQuantity, setWaterQuantity] = useState(1000)
     const [ description, setDescription ] = useState('')
     const [sidebar, setSidebar] = useState(false);
     const showSidebar = () => setSidebar(!sidebar);
@@ -261,9 +266,16 @@ function App()
         }
     };
 
-    
-    
+    const handleZoomChanged = () => {
+        if (map) {
+            setZoomLevel(map.getZoom());
+        }
+    };
 
+    const getMarkerSize = () => {
+        return Math.max(80 - zoomLevel * 3, 10);
+    };
+    
     useEffect(() => {
         const fetchCoordinates = async () => {
           try {
@@ -282,13 +294,16 @@ function App()
             setHouseCoords(data.housecoords)
             setDefaultJunctionCoords(data.junctions)
             setJunctionCoords(data.junctions)
-          } catch (error) {
+            setWaterReservoirCoords(data.waterReservoirCoords)
+        } catch (error) {
             console.error(error);
           }
         };
     
         fetchCoordinates();
       }, []); 
+
+
     async function submitComplaints(event){
         event.preventDefault()
         try{
@@ -395,7 +410,8 @@ function App()
             {/* Google Map */}
             <GoogleMap 
             center={center} 
-            zoom={17}
+            zoom={zoomLevel}
+            onZoomChanged={handleZoomChanged}
             mapContainerStyle={{width:"80%", height:"80%",left:"150px",top:"-10px"}}
             options={{
                 streetViewControl:false,
@@ -454,6 +470,13 @@ function App()
             {coordinates.map((lineArray,lineIndex) => (
                 <Polyline path={lineArray} key={lineIndex} options={{strokeColor:"deepskyblue",strokeOpacity:1}} />
             ))}
+
+            {waterReservoirCoords.map((waterReservoircoord,index) => (
+                <Marker key={index + 1} position={waterReservoircoord} onClick={() => markerIndex(index,'reservoir')} 
+                icon={{
+                    url:waterreservoir,
+                    scaledSize:new window.google.maps.Size(Math.max(20, 120 / Math.pow(2, 17 - zoomLevel)),Math.max(20, 120 / Math.pow(2, 17 - zoomLevel)))}} /> 
+                ))}
             
             {/* Display InfoWindow when a house is selected */}
             {selectedhouseMarker !== null && (
@@ -466,33 +489,9 @@ function App()
                     <h3>HOUSE INFORMATION</h3>
                     <p> house number : {housecoords[selectedhouseMarker].CANID}</p>
                     <p>
-                        Water Supply status:{' '}
-                        <button
-                            onClick={() => toggleHouseWaterSupply(selectedhouseMarker)}
-                        >
-                            {housecoords[selectedhouseMarker].waterSupplied
-                                ? 'YES'
-                                : 'NO'}
-                        </button>
+                        Water Supply status:{housecoords[selectedhouseMarker].waterSupplied?'YES':'NO'}
                     </p>
                     <p> Junction to house : {housecoords[selectedhouseMarker].assignedJunction}</p>
-                    <ButtonGroup>
-                        <button onClick={() => assignJunctionToHouse(housecoords[selectedhouseMarker])}>
-                        ASSIGN JUNCTION
-                        </button>
-                    </ButtonGroup>
-                    {selectedHouseForJunction === housecoords[selectedhouseMarker] && (
-                        <div>
-                            <h4>Select a Junction</h4>
-                            <ButtonGroup>
-                                {junctioncoords.map((junction, index) => (
-                                    <Button key={index} onClick={() => assignJunctionToSelectedHouse(junction)}>
-                                        {junction.JID}
-                                    </Button>
-                                ))}
-                            </ButtonGroup>
-                        </div>
-                    )}
 
                 </div>
                 </InfoWindow>
@@ -510,17 +509,23 @@ function App()
                     <p> Junction number : {junctioncoords[selectedjunctionMarker].JID}</p>
                     <p> Houses under junction : {junctioncoords[selectedjunctionMarker].houses.join(', ')}</p>
                     <p> 
-                        Water supply status:{' '}
-                        <button
-                            onClick={() => toggleJunctionWaterSupply(selectedjunctionMarker)}
-                        >
-                            {junctioncoords[selectedjunctionMarker].waterSupplied
-                                ? 'YES'
-                                : 'NO'}
-                        </button>
+                        Water supply status:{junctioncoords[selectedjunctionMarker].waterSupplied?'YES':'NO'}
                     </p>
                 </div>
                 </InfoWindow>
+            )}
+
+            {selectedreservoir !== null && (
+            <InfoWindow
+                position={waterReservoirCoords[selectedreservoir]}
+                onCloseClick={() => setSelectedreservoir(null)} // Close InfoWindow when clicked
+            >
+                {/* Add content for the InfoWindow */}
+                <div>
+                <h3>RESERVOIR INFORMATION</h3>
+                <p>Water Quantity: {waterQuantity}</p>
+                </div>
+            </InfoWindow>
             )}
 
 
