@@ -10,6 +10,7 @@ import { useRef } from "react";
 import GreenHouseMarker from './greenhousemarker.jpeg'
 import RedHouseMarker from './redhousemarker.jpeg'
 import junctionmarker from './junctionmarker.jpeg'
+import waterreservoir from './waterreservoir.jpeg'
 import bg from './components/bg.jpg'
 import './App.css'
 import './components/Navbar.css'
@@ -26,21 +27,25 @@ function App()
         libraries:MapLibraries,
     })
     const [ map, setMap] = useState('')
+    const [zoomLevel, setZoomLevel] = useState(17)
     const [coordinates, setCoordinates] = useState([])
     const [ center, setCenter] = useState(origin)
     const [searchBox, setSearchBox] = useState(null);
     const [ selectedhouseMarker, setSelectedhouseMarker] = useState(null)
     const [ selectedjunctionMarker, setSelectedjunctionMarker] = useState(null)
+    const [ selectedreservoir, setSelectedreservoir] = useState(null)
     const [ defaultcoordinates, setDefaultCoordinates ] = useState([])
     const [ housecoords, setHouseCoords ] = useState([])
     const [ defaultHouseCoords, setDefaultHouseCoords ] = useState([])
     const [ junctioncoords , setJunctionCoords] = useState([])
     const [ defaultjunctioncoords , setDefaultJunctionCoords ] = useState([])
+    const [waterReservoirCoords, setWaterReservoirCoords] = useState([])
     const [selectedHouseForJunction, setSelectedHouseForJunction] = useState(null);
     let [ subcoords, setSubCoords ] = useState([])
     const [ isModalOpen, setIsModalOpen ] = useState(false)
     const [ modalContent, SetModalContent ] = useState({})
     let [ markerFunction, setMarkerFunction ] = useState(0)
+    const [waterQuantity, setWaterQuantity] = useState(1000)
     const [sidebar, setSidebar] = useState(false);
     const showSidebar = () => setSidebar(!sidebar);
     const navRef = useRef();
@@ -75,6 +80,11 @@ function App()
           onclick:deleteLastJunction,
           cName: 'nav-text'
         },
+        // {
+        //     title:'Reservoir',
+        //     onclick:waterReservoir,
+        //     cName:'nav-text'
+        // },
         {
           title:'Submit',
           onclick:submitCoordinates,
@@ -121,6 +131,9 @@ function App()
             setJunctionCoords((prevjunctioncoords) => [...prevjunctioncoords,newjunction])
             //console.log(junctioncoords)
         }
+        else if(markerFunction==4){
+            setWaterReservoirCoords((prevWaterReservoirCoords) => [...prevWaterReservoirCoords , pos])
+        }
     }
 
     function drawLine(){
@@ -141,6 +154,10 @@ function App()
 
     function junctionMarker(){
         setMarkerFunction(3)
+    }
+
+    function waterReservoir(){
+        setMarkerFunction(4)
     }
     
     function deleteLastHouse(){
@@ -261,13 +278,32 @@ function App()
         {
             setSelectedhouseMarker(index)
             setSelectedjunctionMarker(null)
-        }else if (markertype == 'junction'){
+        }
+        else if (markertype == 'junction'){
             setSelectedjunctionMarker(index)
             setSelectedhouseMarker(null)
         }
+        else if (markertype == 'reservoir'){
+            setSelectedreservoir(index)
+            setSelectedhouseMarker(null)
+            setSelectedjunctionMarker(null)
+        }
     };
 
+    const handleZoomChanged = () => {
+        if (map) {
+            setZoomLevel(map.getZoom());
+        }
+    };
+
+    const getMarkerSize = () => {
+        return Math.max(80 - zoomLevel * 3, 10);
+    };
     
+    function handleSupplyWater(){
+
+    }
+
     const openModal = (body) => {
         SetModalContent({
             body:body
@@ -298,6 +334,7 @@ function App()
             setHouseCoords(data.housecoords)
             setDefaultJunctionCoords(data.junctions)
             setJunctionCoords(data.junctions)
+            setWaterReservoirCoords(data.waterReservoirCoords)
             // console.log(data.housecoords)
             // console.log(data.junctions)
             // data.housecoords.forEach(house => {
@@ -330,6 +367,7 @@ function App()
                 coordinates,
                 housecoords,
                 junctioncoords,
+                waterReservoirCoords,
             }),
         })
         const data = await response.json()
@@ -424,7 +462,8 @@ function App()
             {/* Google Map */}
             <GoogleMap 
             center={center} 
-            zoom={17}
+            zoom={zoomLevel}
+            onZoomChanged={handleZoomChanged}
             mapContainerStyle={{width:"80%", height:"80%",left:"150px",top:"-10px"}}
             options={{
                 streetViewControl:false,
@@ -483,6 +522,13 @@ function App()
             {coordinates.map((lineArray,lineIndex) => (
                 <Polyline path={lineArray} key={lineIndex} options={{strokeColor:"deepskyblue",strokeOpacity:1}} />
             ))}
+
+            {waterReservoirCoords.map((waterReservoircoord,index) => (
+                <Marker key={index + 1} position={waterReservoircoord} onClick={() => markerIndex(index,'reservoir')} 
+                icon={{
+                    url:waterreservoir,
+                    scaledSize:new window.google.maps.Size(Math.max(20, 120 / Math.pow(2, 17 - zoomLevel)),Math.max(20, 120 / Math.pow(2, 17 - zoomLevel)))}} /> 
+                ))}
             
             {/* Display InfoWindow when a house is selected */}
             {selectedhouseMarker !== null && (
@@ -550,6 +596,20 @@ function App()
                     </p>
                 </div>
                 </InfoWindow>
+            )}
+
+            {selectedreservoir !== null && (
+            <InfoWindow
+                position={waterReservoirCoords[selectedreservoir]}
+                onCloseClick={() => setSelectedreservoir(null)} // Close InfoWindow when clicked
+            >
+                {/* Add content for the InfoWindow */}
+                <div>
+                <h3>RESERVOIR INFORMATION</h3>
+                <p>Water Quantity: {waterQuantity}</p>
+                <Button onClick={handleSupplyWater}>Supply Water</Button>
+                </div>
+            </InfoWindow>
             )}
 
 
