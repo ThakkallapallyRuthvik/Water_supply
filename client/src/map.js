@@ -80,11 +80,11 @@ function App()
           onclick:deleteLastJunction,
           cName: 'nav-text'
         },
-        {
-            title:'Reservoir',
-            onclick:waterReservoir,
-            cName:'nav-text'
-        },
+        // {
+        //     title:'Reservoir',
+        //     onclick:waterReservoir,
+        //     cName:'nav-text'
+        // },
         {
           title:'Submit',
           onclick:submitCoordinates,
