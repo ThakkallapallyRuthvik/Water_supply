@@ -211,7 +211,7 @@ app.post("/verifyotp" , async (req,res)=>{
                         //Matching otp
                         await User.updateOne({ email : email}, {verified : true});
                         const deleteddocs = await Otpverification.deleteMany({ email });
-                        console.log(deleteddocs)
+                        // console.log(deleteddocs)
                         res.json({
                             status : "SUCCESS",
                             message : "Your account has been verified successfully!",
