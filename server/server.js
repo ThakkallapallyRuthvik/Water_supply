@@ -13,6 +13,7 @@ const nodemailer = require('nodemailer');
 const { v4: uuidv4 } = require("uuid");
 require("dotenv").config();
 const path = require("path");
+const { error } = require('console');
 
 app.use(cors())
 app.use(express.json())
@@ -85,16 +86,29 @@ app.post("/api/register", async (req, res) => {
             // Password handling
             const saltRounds = 10;
             bcrypt.hash(password, saltRounds).then(hashedPassword => {
-                const newUser = new User({
-                    ID,
-                    name,
-                    email,
-                    password: hashedPassword,
-                    role,
-                    verified: false,
-                    add,
-                    houseAlloted:false,
-                });
+                let newUser;
+                if (role == "Customer"){
+                    newUser = new User({
+                        ID,
+                        name,
+                        email,
+                        password: hashedPassword,
+                        role,
+                        verified: false,
+                        add,
+                        houseAlloted:false,
+                    });
+                }
+                else{
+                    newUser = new User({
+                        ID,
+                        name,
+                        email,
+                        password: hashedPassword,
+                        role,
+                        verified: false,
+                    });
+                }
                 newUser
                     .save()
                     .then(result => {
@@ -196,7 +210,8 @@ app.post("/verifyotp" , async (req,res)=>{
                     } else {
                         //Matching otp
                         await User.updateOne({ email : email}, {verified : true});
-                        Otpverification.deleteOne({ otp });
+                        const deleteddocs = await Otpverification.deleteMany({ email });
+                        console.log(deleteddocs)
                         res.json({
                             status : "SUCCESS",
                             message : "Your account has been verified successfully!",
