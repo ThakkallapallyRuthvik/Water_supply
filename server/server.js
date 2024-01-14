@@ -677,6 +677,7 @@ app.post("/api/map",async(req,res) =>{
         coordinates:req.body.coordinates,
         housecoords:req.body.housecoords,
         junctions:req.body.junctioncoords,
+        waterReservoirCoords:req.body.waterReservoirCoords,
     })
 
     if(coord){
@@ -690,7 +691,7 @@ app.post("/api/map",async(req,res) =>{
 app.post("/api/default",async(req,res) =>{
     const coord = await Coordinates.findOne();
     if(coord){
-        return res.json({coordinates:coord.coordinates,housecoords:coord.housecoords,junctions:coord.junctions})
+        return res.json({coordinates:coord.coordinates,housecoords:coord.housecoords,junctions:coord.junctions,waterReservoirCoords:coord.waterReservoirCoords})
     }
     else{
         return res.json({status:'error coords not imported'})
