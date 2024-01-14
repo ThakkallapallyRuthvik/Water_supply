@@ -12,6 +12,7 @@ function App()
   const [ modalContent, setModalContent ] = useState({})
   const [ otp, setOtp ] = useState('')
   const [ disable, setDisable ] = useState(false)
+  const [ add, setAdd ] = useState('')
 
   const openModal = (header, body) => {
     if (header == "FAILED"){
@@ -43,6 +44,14 @@ function App()
   };
 
 
+  useEffect(() => {
+    if (role === 'Department') {
+      setAdd('None');
+    }
+    if (role === 'Customer'){
+      setAdd('')
+    }
+  }, [role]);
 
   async function sendotp(event){
     event.preventDefault()
@@ -80,7 +89,8 @@ function App()
         name,
         email,
         password,
-        role
+        role,
+        add
       }),
     })
 
@@ -133,8 +143,17 @@ function App()
             <option value="Customer">Customer</option>
           </select>
         </div>
-        <br>
-        </br>
+        <br/>
+        {role=="Customer" && (
+          <div className='user-box'>
+            <input 
+            value={add}
+            onChange={(e)=>setAdd(e.target.value)}
+            placeholder='Enter Address'
+            />
+            <br/>
+          </div> 
+        )}
         <button onClick={registerUser} style={{width:'100%',height:'30px'}} >Get OTP</button>
         <br/>
         <br/>

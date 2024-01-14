@@ -1,22 +1,34 @@
 import {React,useState,useEffect} from 'react';
-import { useJsApiLoader, GoogleMap, Marker, Polyline, InfoWindow } from "@react-google-maps/api";
+import { useJsApiLoader, GoogleMap, Marker, Polyline, InfoWindow, StandaloneSearchBox } from "@react-google-maps/api";
 import {Flex,Box,HStack,Button,ButtonGroup,Modal,ModalOverlay,ModalContent,ModalHeader,ModalBody,ModalCloseButton} from "@chakra-ui/react";
 // import {AdvancedMarker,Pin} from '@vis.gl/react-google-maps' 
+import * as FaIcons from 'react-icons/fa';
+import * as AiIcons from 'react-icons/ai';
+import { Link } from 'react-router-dom';
+import { IconContext } from 'react-icons';
+import { useRef } from "react";
 import GreenHouseMarker from './greenhousemarker.jpeg'
 import RedHouseMarker from './redhousemarker.jpeg'
 import junctionmarker from './junctionmarker.jpeg'
+import bg from './components/bg.jpg'
 import './App.css'
+import './components/Navbar.css'
 
 
+
+  
 function App()
 {
     const origin = { lat: 16.82365305593255, lng: 78.36275955215761 };
+    const MapLibraries = ["places"]
     const {isLoaded} = useJsApiLoader({
         googleMapsApiKey:"AIzaSyB6IhzjbQp_KS4lsGdGWq3TvMgMdngijQU",
+        libraries:MapLibraries,
     })
     const [ map, setMap] = useState('')
     const [coordinates, setCoordinates] = useState([])
     const [ center, setCenter] = useState(origin)
+    const [searchBox, setSearchBox] = useState(null);
     const [ selectedhouseMarker, setSelectedhouseMarker] = useState(null)
     const [ selectedjunctionMarker, setSelectedjunctionMarker] = useState(null)
     const [ defaultcoordinates, setDefaultCoordinates ] = useState([])
@@ -27,10 +39,50 @@ function App()
     const [selectedHouseForJunction, setSelectedHouseForJunction] = useState(null);
     let [ subcoords, setSubCoords ] = useState([])
     const [ isModalOpen, setIsModalOpen ] = useState(false)
-    const [ modalContent, SetModalContent ] = useState({})
-    let [ markerFunction, setMarkerFunction ] = useState(1)
+    const [ isSubModalOpen, setIsSubModalOpen ] = useState(false)
+    const [ modalContent, setModalContent ] = useState({})
+    let [ markerFunction, setMarkerFunction ] = useState(0)
     const [ description, setDescription ] = useState('')
+    const [sidebar, setSidebar] = useState(false);
+    const showSidebar = () => setSidebar(!sidebar);
+    const navRef = useRef();
+    const openModal = (header,body) => {
+        if (header == "FAILED"){
+            setModalContent({
+              header: '❌'+header,
+              body: body,
+              border: "3px solid red"
+            });
+          }
+          else{
+            setModalContent({
+              header: '✅'+header,
+              body: body,
+              border: "3px solid lightgreen"
+            });
+          }
+        setIsSubModalOpen(true);
+        // Automatically close the modal after 2 seconds
+        setTimeout(() => {
+            setIsSubModalOpen(false);
+        }, 2000);
+    };
     
+    let SidebarData = [
+        {
+          title: 'Raise a Complaint',
+          onclick:() =>{setIsModalOpen(true)},
+          cName: 'nav-text',
+        },
+      ];
+
+    const onPlacesChanged = () => {
+        const places = searchBox.getPlaces();
+        if (places.length > 0) {
+          const selectedPlace = places[0].geometry.location;
+          map.panTo({ lat: selectedPlace.lat(), lng: selectedPlace.lng() });
+        }
+      };
 
     function addMarker(pos){
         if(markerFunction == 1){
@@ -210,13 +262,7 @@ function App()
     };
 
     
-    const openModal = (body) => {
-        SetModalContent({
-            body:body
-        })
-        
-        setIsModalOpen(true);
-        };
+    
 
     useEffect(() => {
         const fetchCoordinates = async () => {
@@ -236,30 +282,17 @@ function App()
             setHouseCoords(data.housecoords)
             setDefaultJunctionCoords(data.junctions)
             setJunctionCoords(data.junctions)
-            // console.log(data.housecoords)
-            // console.log(data.junctions)
-            // data.housecoords.forEach(house => {
-            //     console.log(house.waterSupplied);
-            //   });
-            // data.junctions.forEach(junction => {
-            //     console.log(junction.waterSupplied);
-            //   });
-              
-            // console.log(defaultcoordinates)
-            // console.log(coordinates)
           } catch (error) {
             console.error(error);
           }
         };
     
         fetchCoordinates();
-      }, []); // Empty dependency array ensures the effect runs only once
-    
-
-      async function submitComplaints(event){
+      }, []); 
+    async function submitComplaints(event){
         event.preventDefault()
         try{
-        const response = await fetch('http://localhost:5000/api/mapCust',{
+        const response = await fetch('http://localhost:5000/api/mapCust/:ID',{
             method:'POST',
             headers:{
                 'Content-Type':'application/json'
@@ -271,58 +304,99 @@ function App()
         const data = await response.json()
         console.log(data)
         if(data){
-            console.log('Complaint raised successfully')
+            openModal(data.status,data.message)
+        }
+        else{
         }
         } catch (error) {
             console.error("Error: ",error)
         }    
     }
-
-    async function submitCoordinates(event){
-        event.preventDefault()
-        try{
-
-        const response = await fetch('http://localhost:5000/api/map',{
-            method:'POST',
-            headers:{
-                'Content-Type':'application/json'
-            },
-            body: JSON.stringify({
-                coordinates,
-                housecoords,
-                junctioncoords,
-            }),
-        })
-        const data = await response.json()
-        if(data){
-            openModal('✅Submitted succesfully')
-        }
-        } catch (error) {
-            openModal('❌Error submitting coordinates');
-            console.error("Error: ",error)
-        }      
-    }
-
+    
     if (!isLoaded){
         return "Loading"
     }
     return(
-        <div className='map'>
-        <Navbar>
-            <NavItem icon="Raise a Complaint" onClick={openModal} />
-        </Navbar>
+        <div className='map' style={{backgroundImage : `url(${bg})`,  
+        backgroundSize: 'cover',
+        
+        backgroundPosition: 'center',
+        // backgroundRepeat: 'no-repeat',
+        height: '150vh',
+        width:'100vw',
+        opacity: '90%'}}>
+        <IconContext.Provider value={{ color: '#fff' }}>
+        <div className='navbar'> 
+          <header>
+                <nav ref={navRef}>
+                  <a href="/#">about us</a>
+                  <a href="/#">contact</a>
+                  <a href="/#">help</a>
+                  <a href="/#">complaint</a>
+                </nav>
+              </header>
+          <Link to='#' className='menu-bars'>
+            <i className='fas fa-paintbrush' onClick={showSidebar} style={{color: 'blueviolet'}}/>
+          </Link>
+        </div>
+        <nav className={sidebar ? 'nav-menu active' : 'nav-menu'}>
+          <ul className='nav-menu-items' >
+            <li className='navbar-toggle'>
+              <Link to='#' className='menu-bars'>
+                {/* <AiIcons.AiOutlineClose /> */}
+                <i className='far fa-circle-xmark' onClick={showSidebar} style={{color: 'blueviolet'}}/>
+              </Link>
+            
+            </li>
+            /* {SidebarData.map((item, index) => {
+              return (
+                <li key={index} className={item.cName}>
+                  <Link onClick={item.onclick}>
+                    <span>{item.title}</span>
+                  </Link>
+                </li>
+              );
+            })} 
+          </ul>
+        </nav>
+    </IconContext.Provider>
+        {map && (
+                <StandaloneSearchBox
+                onLoad={(ref) => {setSearchBox(ref)}}
+                onPlacesChanged={onPlacesChanged}
+                >
+                <input
+                    type="text"
+                    placeholder="   Search for a location"
+                    style={{
+                    boxSizing: `border-box`,
+                    border: `1px solid transparent`,
+                    width: `300px`,
+                    height: `32px`,
+                    marginTop:'20px',
+                    marginLeft:'180px',
+                    borderRadius: `3px`,
+                    boxShadow: `0 2px 6px rgba(0, 0, 0, 0.3)`,
+                    fontSize: `14px`,
+                    outline: `none`,
+                    textOverflow: `ellipses`,
+                    position:'absolute',
+                    }}
+                />
+                </StandaloneSearchBox>
+            )}
         <Flex 
         position="relative"
         flexdirection="column"
         alignItems="center"
         h="100vh"
         w="100vw"
-        backgroundColor="white">
+        zIndex="-10">
             {/* Google Map */}
             <GoogleMap 
             center={center} 
             zoom={17}
-            mapContainerStyle={{width:"80%", height:"80%",left:"150px",top:"0"}}
+            mapContainerStyle={{width:"80%", height:"80%",left:"150px",top:"-10px"}}
             options={{
                 streetViewControl:false,
                 mapTypeControl:false,
@@ -343,6 +417,7 @@ function App()
             }}
             onLoad={(map) => setMap(map) }
             onClick={(event) => addMarker(event.latLng)}>
+            
             {/* onRightClick={(event) => houseMarker(event.latLng)}> */}
 
             {/* Displaying markers */}
@@ -354,7 +429,7 @@ function App()
                     url:housecoord.waterSupplied ? GreenHouseMarker : RedHouseMarker,
                     scaledSize:new window.google.maps.Size(20,20)}} /> 
             ))
-                }
+            }
                 
             {/* Displaying junctions */}
             
@@ -450,178 +525,51 @@ function App()
 
 
             </GoogleMap> 
-        
-        {/* Modal for success message */}
+        {/* Modal for submitting complaint */}
         <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} blockScrollOnMount={false}>
-                <ModalOverlay />
-                    <ModalContent bg="white" border="2px solid red" borderRadius="5px" p={10} top={70} left="20%" boxSize="60%" style={{height:"75%"}}>
-                    <ModalCloseButton style={{marginLeft:'97%'}} />
-                        <ModalHeader style={{marginLeft:'32%',fontWeight:'bold',fontSize:30}}>RAISE A COMPLAINT</ModalHeader>
-                        <br/>
-                        <br/>
-                        <ModalBody>
-                        <h3>Description : 
-                        <input 
-                            value={description}
-                            onChange={(e)=>setDescription(e.target.value)}
-                            placeholder='Enter Your Complaint'
-                            type='text' 
-                            style={{marginLeft:10,width:'70%',height:'50px'}}
-                            />
-                        </h3>
-                        <br/>
-                        <br/>
-                        <br/>
-                        <br/>
-                        <input type='submit' style={{width:'10%',backgroundColor:'skyblue'}} onClick={submitComplaints} />
-                        </ModalBody>
-                    </ModalContent>
-            </Modal>
+        <ModalOverlay />
+            <ModalContent bg="white" border="2px solid red" borderRadius="5px" p={10} top={120} left="20%" boxSize="60%" style={{height:"75%"}}>
+            <ModalCloseButton style={{marginLeft:'97%'}} />
+                <ModalHeader style={{marginLeft:'32%',fontWeight:'bold',fontSize:30}}>RAISE A COMPLAINT</ModalHeader>
+                <br/>
+                <br/>
+                <ModalBody>
+                <h3>Description : 
+                <input 
+                    value={description}
+                    onChange={(e)=>setDescription(e.target.value)}
+                    placeholder='Enter Your Complaint'
+                    type='text' 
+                    style={{marginLeft:10,width:'70%',height:'50px'}}
+                    />
+                </h3>
+                <br/>
+                <br/>
+                <br/>
+                <br/>
+                <input type='submit' style={{width:'10%',backgroundColor:'skyblue',marginLeft:'90%'}} onClick={submitComplaints} />
+                </ModalBody>
+            </ModalContent>
+        </Modal>
+        {/* Modal for displaying success message */}
+        <Modal isOpen={isSubModalOpen} onClose={() => setIsSubModalOpen(false)} blockScrollOnMount={false}>
+        <ModalOverlay />
+        <ModalContent bg="white" border={modalContent.border} borderRadius="5px" p={10} top={70} left="40%" boxSize="18%">
+        <ModalHeader style={{marginLeft:65}}>{modalContent.header}</ModalHeader>
+            <ModalBody>
+                {modalContent.body}
+            </ModalBody>
+        </ModalContent>
+        </Modal>
         </Flex>
         </div>
     )
 }
 
 
-function Navbar(props) {
-    return (
-      <nav className="navbar">
-        <ul className="navbar-nav">{props.children}</ul>
-      </nav>
-    );
-  }
-  
-  function NavItem({ icon, onClick }) {
-    return (
-        <li className="nav-item">
-            <a href="#" className="icon-button" onClick={onClick}>
-                {icon}
-            </a>
-        </li>
-    );
-}
 
 export default App
 
 
-    
-//     if (!isLoaded){
-//         return "Loading"
-//     }
-//     return(
-//         <div className='map'>
-//         <Navbar>
-//             <NavItem icon="Raise a Complaint" onClick={openModal} />
-//         </Navbar>
-//         <Flex 
-//         position="relative"
-//         flexdirection="column"
-//         alignItems="center"
-//         h="100vh"
-//         w="100vw"
-//         backgroundColor="white">
-//             {/* Google Map */}
-//             <GoogleMap 
-//             center={center} 
-//             zoom={17}
-//             mapContainerStyle={{width:"80%", height:"80%",left:"150px",top:"0"}}
-//             options={{
-//                 streetViewControl:false,
-//                 mapTypeControl:false,
-//                 fullscreenControl:false,
-//                 clickableIcons:false,
-//                 styles:[
-//                     {
-//                         featureType:"poi",
-//                         elementType:"labels",
-//                         stylers:[{visibility:"off"}],
-//                     },
-//                 ]
-//             }}
-//             onLoad={(map) => setMap(map) }>
-
-//             {/* Displaying markers */}
-            
-//             {housecoords.map((housecoord,index) => (
-//                 <Marker key={index} position={housecoord} onClick={() => markerIndex(index)} 
-//                 icon={{
-//                     url:GreenHouseMarker,
-//                     scaledSize:new window.google.maps.Size(20,20)}} /> 
-//                 ))}
 
 
-//             {/* Draw default polyline */}    
-//             {showMarkers && defaultcoordinates.map((lineArray,lineIndex) => (
-//                 <Polyline path={lineArray} key={lineIndex} options={{strokeColor:"deepskyblue",strokeOpacity:1,geodesic:true}} />
-//             ))}
-
-//             {/* Draw users polylines */}    
-//             {showMarkers && coordinates.map((lineArray,lineIndex) => (
-//                 <Polyline path={lineArray} key={lineIndex} options={{strokeColor:"deepskyblue",strokeOpacity:1,geodesic:true}} />
-//             ))}
-            
-//             {/* Display InfoWindow when a marker is selected */}
-//             {selectedMarker !== null && (
-//                 <InfoWindow
-//                 position={housecoords[selectedMarker]}
-//                 onCloseClick={() => setSelectedMarker(null)} // Close InfoWindow when clicked
-//                 >
-//                 {/* Add content for the InfoWindow */}
-//                 <div>
-//                     <h3>Marker Information</h3>
-//                     <p>You have selected marker number {selectedMarker}</p>
-//                 </div>
-//                 </InfoWindow>
-//             )}
-
-//             </GoogleMap> 
-//              {/* Modal for success message */}
-//              <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} blockScrollOnMount={false}>
-//                 <ModalOverlay />
-//                     <ModalContent bg="white" border="2px solid red" borderRadius="5px" p={10} top={70} left="20%" boxSize="60%" style={{height:"75%"}}>
-//                     <ModalCloseButton style={{marginLeft:'97%'}} />
-//                         <ModalHeader style={{marginLeft:'32%',fontWeight:'bold',fontSize:30}}>RAISE A COMPLAINT</ModalHeader>
-//                         <br/>
-//                         <br/>
-//                         <ModalBody>
-//                         <h3>Description : 
-//                         <input 
-//                             value={description}
-//                             onChange={(e)=>setDescription(e.target.value)}
-//                             placeholder='Enter Your Complaint'
-//                             type='text' 
-//                             style={{marginLeft:10,width:'70%',height:'50px'}}
-//                             />
-//                         </h3>
-//                         <br/>
-//                         <br/>
-//                         <br/>
-//                         <br/>
-//                         <input type='submit' style={{width:'10%',backgroundColor:'skyblue'}} onClick={submitComplaints} />
-//                         </ModalBody>
-//                     </ModalContent>
-//             </Modal>
-//         </Flex>
-//         </div>
-//     )
-// }
-
-// function Navbar(props) {
-//     return (
-//       <nav className="navbar">
-//         <ul className="navbar-nav">{props.children}</ul>
-//       </nav>
-//     );
-//   }
-  
-//   function NavItem({ icon, onClick }) {
-//     return (
-//         <li className="nav-item">
-//             <a href="#" className="icon-button" onClick={onClick}>
-//                 {icon}
-//             </a>
-//         </li>
-//     );
-// }
-
-// export default App

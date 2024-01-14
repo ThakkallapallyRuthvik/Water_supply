@@ -1,22 +1,34 @@
 import {React,useState,useEffect} from 'react';
-import { useJsApiLoader, GoogleMap, Marker, Polyline, InfoWindow } from "@react-google-maps/api";
+import { useJsApiLoader, GoogleMap, Marker, Polyline, InfoWindow, StandaloneSearchBox } from "@react-google-maps/api";
 import {Flex,Box,HStack,Button,ButtonGroup,Modal,ModalOverlay,ModalContent,ModalHeader,ModalBody,ModalCloseButton} from "@chakra-ui/react";
 // import {AdvancedMarker,Pin} from '@vis.gl/react-google-maps' 
+import * as FaIcons from 'react-icons/fa';
+import * as AiIcons from 'react-icons/ai';
+import { Link } from 'react-router-dom';
+import { IconContext } from 'react-icons';
+import { useRef } from "react";
 import GreenHouseMarker from './greenhousemarker.jpeg'
 import RedHouseMarker from './redhousemarker.jpeg'
 import junctionmarker from './junctionmarker.jpeg'
+import bg from './components/bg.jpg'
 import './App.css'
+import './components/Navbar.css'
 
 
+
+  
 function App()
 {
     const origin = { lat: 16.82365305593255, lng: 78.36275955215761 };
+    const MapLibraries = ["places"]
     const {isLoaded} = useJsApiLoader({
         googleMapsApiKey:"AIzaSyB6IhzjbQp_KS4lsGdGWq3TvMgMdngijQU",
+        libraries:MapLibraries,
     })
     const [ map, setMap] = useState('')
     const [coordinates, setCoordinates] = useState([])
     const [ center, setCenter] = useState(origin)
+    const [searchBox, setSearchBox] = useState(null);
     const [ selectedhouseMarker, setSelectedhouseMarker] = useState(null)
     const [ selectedjunctionMarker, setSelectedjunctionMarker] = useState(null)
     const [ defaultcoordinates, setDefaultCoordinates ] = useState([])
@@ -28,8 +40,55 @@ function App()
     let [ subcoords, setSubCoords ] = useState([])
     const [ isModalOpen, setIsModalOpen ] = useState(false)
     const [ modalContent, SetModalContent ] = useState({})
-    let [ markerFunction, setMarkerFunction ] = useState(1)
-    
+    let [ markerFunction, setMarkerFunction ] = useState(0)
+    const [sidebar, setSidebar] = useState(false);
+    const showSidebar = () => setSidebar(!sidebar);
+    const navRef = useRef();
+    let SidebarData = [
+        {
+          title: 'Draw Line',
+          onclick:drawLine,
+          cName: 'nav-text',
+        },
+        {
+          title: 'House Marker',
+          onclick:houseMarker,
+          cName: 'nav-text'
+        },
+        {
+          title: 'Junction',
+          onclick:junctionMarker,
+          cName: 'nav-text'
+        },
+        {
+          title: 'Delete Last Line',
+          onclick:deleteLastLine,
+          cName: 'nav-text'
+        },
+        {
+          title: 'Delete Last House',
+          onclick:deleteLastHouse,
+          cName: 'nav-text'
+        },
+        {
+          title: 'Delete Last Junction',
+          onclick:deleteLastJunction,
+          cName: 'nav-text'
+        },
+        {
+          title:'Submit',
+          onclick:submitCoordinates,
+          cName:'nav-text'
+        }
+      ];
+
+    const onPlacesChanged = () => {
+        const places = searchBox.getPlaces();
+        if (places.length > 0) {
+          const selectedPlace = places[0].geometry.location;
+          map.panTo({ lat: selectedPlace.lat(), lng: selectedPlace.lng() });
+        }
+      };
 
     function addMarker(pos){
         if(markerFunction == 1){
@@ -287,28 +346,86 @@ function App()
         return "Loading"
     }
     return(
-        <div className='map'>
-        <Navbar>
-            <NavItem icon="Draw New Line" onClick={drawLine} />
-            <NavItem icon="House Markers" onClick={houseMarker} />
-            <NavItem icon="Junction" onClick={junctionMarker} />
-            <NavItem icon="Delete Last Line" onClick={deleteLastLine} />
-            <NavItem icon="Delete Last House" onClick={deleteLastHouse} />
-            <NavItem icon="Delete Last Junction" onClick={deleteLastJunction} />
-            <NavItem icon="Submit" onClick={submitCoordinates} />
-        </Navbar>
+        <div className='map' style={{backgroundImage : `url(${bg})`,  
+        backgroundSize: 'cover',
+        
+        backgroundPosition: 'center',
+        // backgroundRepeat: 'no-repeat',
+        height: '150vh',
+        width:'100vw',
+        opacity: '90%'}}>
+        <IconContext.Provider value={{ color: '#fff' }}>
+        <div className='navbar'> 
+          <header>
+                <nav ref={navRef}>
+                  <a href="/#">about us</a>
+                  <a href="/#">contact</a>
+                  <a href="/#">help</a>
+                  <a href="/#">complaint</a>
+                </nav>
+              </header>
+          <Link to='#' className='menu-bars'>
+            <i className='fas fa-paintbrush' onClick={showSidebar} style={{color: 'blueviolet'}}/>
+          </Link>
+        </div>
+        <nav className={sidebar ? 'nav-menu active' : 'nav-menu'}>
+          <ul className='nav-menu-items' >
+            <li className='navbar-toggle'>
+              <Link to='#' className='menu-bars'>
+                {/* <AiIcons.AiOutlineClose /> */}
+                <i className='far fa-circle-xmark' onClick={showSidebar} style={{color: 'blueviolet'}}/>
+              </Link>
+            
+            </li>
+            /* {SidebarData.map((item, index) => {
+              return (
+                <li key={index} className={item.cName}>
+                  <Link onClick={item.onclick}>
+                    <span>{item.title}</span>
+                  </Link>
+                </li>
+              );
+            })} 
+          </ul>
+        </nav>
+    </IconContext.Provider>
+        {map && (
+                <StandaloneSearchBox
+                onLoad={(ref) => {setSearchBox(ref)}}
+                onPlacesChanged={onPlacesChanged}
+                >
+                <input
+                    type="text"
+                    placeholder="   Search for a location"
+                    style={{
+                    boxSizing: `border-box`,
+                    border: `1px solid transparent`,
+                    width: `300px`,
+                    height: `32px`,
+                    marginTop:'20px',
+                    marginLeft:'180px',
+                    borderRadius: `3px`,
+                    boxShadow: `0 2px 6px rgba(0, 0, 0, 0.3)`,
+                    fontSize: `14px`,
+                    outline: `none`,
+                    textOverflow: `ellipses`,
+                    position:'absolute',
+                    }}
+                />
+                </StandaloneSearchBox>
+            )}
         <Flex 
         position="relative"
         flexdirection="column"
         alignItems="center"
         h="100vh"
         w="100vw"
-        backgroundColor="white">
+        zIndex="-10">
             {/* Google Map */}
             <GoogleMap 
             center={center} 
             zoom={17}
-            mapContainerStyle={{width:"80%", height:"80%",left:"150px",top:"0"}}
+            mapContainerStyle={{width:"80%", height:"80%",left:"150px",top:"-10px"}}
             options={{
                 streetViewControl:false,
                 mapTypeControl:false,
@@ -329,6 +446,7 @@ function App()
             }}
             onLoad={(map) => setMap(map) }
             onClick={(event) => addMarker(event.latLng)}>
+            
             {/* onRightClick={(event) => houseMarker(event.latLng)}> */}
 
             {/* Displaying markers */}
@@ -340,7 +458,7 @@ function App()
                     url:housecoord.waterSupplied ? GreenHouseMarker : RedHouseMarker,
                     scaledSize:new window.google.maps.Size(20,20)}} /> 
             ))
-                }
+            }
                 
             {/* Displaying junctions */}
             
@@ -436,54 +554,6 @@ function App()
 
 
             </GoogleMap> 
-        {/* <Box
-        position='absolute'
-        p={4}
-        borderRadius='lg'
-        mt={4}
-        bgColor='skyblue'
-        shadow='base'
-        minW='container.md'
-        zIndex='modal'
-        w='50%'
-        h='6%'
-        top="5%"            
-        left="65%"           
-        transform="translate(-50%, -50%)"
-        >
-        <HStack spacing={4}>
-        <ButtonGroup height="100%">
-            <Button bgColor="white" position="absolute" type="button" height="50%" 
-            width="20%" onClick={drawLine}>
-            Draw new line
-            </Button>
-            <Button bgColor="white" position="absolute" type="button" height="50%"
-             width="20%" left="20%" onClick={houseMarker}>
-            House Marker
-            </Button>
-            <Button bgColor="white" position="absolute" type="submit" 
-            left="40.5%" height="50%" width="20%" onClick={deleteLastLine}>
-            Delete last line
-            </Button>
-            <Button bgColor="white" position="absolute" type="submit" 
-            left="61%" height="50%" width="19%" onClick={deleteLastHouse}>
-            Delete last house
-            </Button>
-            <Button bgColor="white" position="absolute" type="submit" 
-            left="80.5%" height="50%" width="18%" onClick={junctionMarker}>
-            New Junction
-            </Button>
-            <Button bgColor="white" position="absolute" type="submit" 
-            left="99%" height="50%" width="19%" onClick={deleteLastJunction}>
-            Delete Last Junction
-            </Button>
-            <Button bgColor="white" position="absolute" type="submit" 
-            left="118.25%" height="50%" width="18%" onClick={submitCoordinates}>
-            Submit
-            </Button>
-        </ButtonGroup>
-        </HStack>
-        </Box> */}
         {/* Modal for success message */}
               <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} blockScrollOnMount={false}>
                  <ModalOverlay />
@@ -501,22 +571,23 @@ function App()
 }
 
 
-function Navbar(props) {
-    return (
-      <nav className="navbar">
-        <ul className="navbar-nav">{props.children}</ul>
-      </nav>
-    );
-  }
+// function Navbar(props) {
+//     return (
+//       <nav className="navbar">
+//         <ul className="navbar-nav">{props.children}</ul>
+//       </nav>
+//     );
+//   }
   
-  function NavItem({ icon, onClick }) {
-    return (
-        <li className="nav-item">
-            <a href="#" className="icon-button" onClick={onClick}>
-                {icon}
-            </a>
-        </li>
-    );
-}
+//   function NavItem({ icon, onClick }) {
+//     return (
+//         <li className="nav-item">
+//             <a href="#" className="icon-button" onClick={onClick}>
+//                 {icon}
+//             </a>
+//         </li>
+//     );
+// }
+
 
 export default App

@@ -1,0 +1,23 @@
+
+
+.navbar {
+    background-color: rgb(69, 186, 253, 0);
+    padding: 20px; 
+}
+  
+  .menu-container {
+    position: relative;
+    top: -20px;
+    display: flex; /* Ensure child elements are displayed in a flex container */
+    align-items: center; /* Align child elements vertically in the center */
+  }
+  
+  .menu-trigger {
+    cursor: pointer;
+    /* position: relative;
+    top: 0px; */
+    margin-right: 10px; 
+  }
+  
+  
+  
