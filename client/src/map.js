@@ -11,10 +11,17 @@ import GreenHouseMarker from './greenhousemarker.jpeg'
 import RedHouseMarker from './redhousemarker.jpeg'
 import junctionmarker from './junctionmarker.jpeg'
 import waterreservoir from './waterreservoir.jpeg'
-import bg from './components/bg.jpg'
+import bg from './bg.jpg'
+import user from './img/user.png';
+import edit from './img/edit.png';
+import inbox from './img/envelope.png';
+import settings from './img/settings.png';
+import help from './img/question.png';
+import logout from './img/log-out.png';
+import './profile.css';
 import './App.css'
-import './components/Navbar.css'
-
+import './Navbar.css'
+import UserList from './UserList'
 
 
   
@@ -41,13 +48,23 @@ function App()
     const [ defaultjunctioncoords , setDefaultJunctionCoords ] = useState([])
     const [selectedHouseForJunction, setSelectedHouseForJunction] = useState(null);
     const [waterReservoirCoords, setWaterReservoirCoords] = useState([])
+    const [selectedUserForAllotment, setSelectedUserForAllotment] = useState(null);
+    const [newRegistrationsListModalOpen, setNewRegistrationsListModalOpen] = useState(false);
+    const [isHouseMarkerAdded, setIsHouseMarkerAdded] = useState(false);
+    const [UserDataForDept, setUserDataForDept] = useState([]);
     let [ subcoords, setSubCoords ] = useState([])
     const [ isModalOpen, setIsModalOpen ] = useState(false)
     const [ modalContent, SetModalContent ] = useState({})
+    const [ newRegModal, setNewRegModal ] = useState(false)
+    const [ newRegModalContent, setNewRegModalContent ] = useState({})
+    const [ ID, setID ] = useState('')
     let [ markerFunction, setMarkerFunction ] = useState(0)
     const [waterQuantity, setWaterQuantity] = useState(1000)
+    const [ isHovered, setIsHovered ] = useState(false)
     const [sidebar, setSidebar] = useState(false);
     const showSidebar = () => setSidebar(!sidebar);
+    const [open, setOpen] = useState(false);
+    let menuRef = useRef();
     const navRef = useRef();
     let SidebarData = [
         {
@@ -87,11 +104,31 @@ function App()
         // },
         {
           title:'Submit',
-          onclick:submitCoordinates,
+          onclick:async ()=>{
+            await submitCoordinates();
+            await submitUserData();
+          },
           cName:'nav-text'
         }
       ];
 
+    useEffect(() => {
+    let handler = (e)=>{
+        if(!menuRef.current.contains(e.target)){
+        setOpen(false);
+        // console.log(menuRef.current);
+        }      
+    };
+
+    document.addEventListener("mousedown", handler);
+    
+
+    return() =>{
+        document.removeEventListener("mousedown", handler);
+    }
+
+    });
+    
     const onPlacesChanged = () => {
         const places = searchBox.getPlaces();
         if (places.length > 0) {
@@ -113,6 +150,7 @@ function App()
         else if (markerFunction == 2){
             const newhouse = {
                 CANID : "H" + (housecoords.length+1),
+                userid:ID,
                 hcoords : pos,
                 waterSupplied : true,
                 assignedJunction : null,
@@ -316,6 +354,13 @@ function App()
         }, 2000);
         };
 
+    const openNewRegModal = (body) => {
+        setNewRegModalContent({
+            body: body
+        });
+        setNewRegModal(true);
+    };
+
     useEffect(() => {
         const fetchCoordinates = async () => {
           try {
@@ -353,8 +398,37 @@ function App()
         fetchCoordinates();
       }, []); // Empty dependency array ensures the effect runs only once
     
+
+      useEffect(() => {
+        const fetchEligibleUsers = async () => {
+            try {
+                const response = await fetch('http://localhost:5000/api/eligibleusers', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                const data = await response.json();
+                // console.log(data)
+                // if (Array.isArray(data)) {
+                //     setUserDataForDept(data);
+                // } else {
+                //     console.error('Invalid data format:', data);
+                // }
+                setUserDataForDept(data);
+
+            } catch (error) {
+                console.error('Error fetching eligible users:', error);
+            }
+        };
+    
+        fetchEligibleUsers();
+    }, []);
+    
     async function submitCoordinates(event){
-        event.preventDefault()
+        if(event){
+            event.preventDefault()
+        }
         try{
 
         const response = await fetch('http://localhost:5000/api/map',{
@@ -379,6 +453,79 @@ function App()
         }      
     }
 
+    const submitUserData = async () => {
+        try {
+            const response = await fetch('http://localhost:5000/api/saveupdateddata', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    updatedUserData: UserDataForDept,
+                }),
+            });
+    
+            const data = await response.json();
+    
+            if (data) {
+                openModal('✅ User data submitted successfully');
+            }
+        } catch (error) {
+            openModal('❌ Error submitting user data');
+            console.error('Error: ', error);
+        }
+    };
+    
+
+    const openNewRegistrationsList = () => {
+        setIsHouseMarkerAdded(false);
+        const handleAllotButtonClick = (user) => {
+            setNewRegistrationsListModalOpen(false);
+            houseMarker();
+            const newHouseIndex = "H"+(housecoords.length+1);
+            const updatedUserData = UserDataForDept.map((userData) => {
+                if (userData === user) {
+                    return {
+                        ...userData,
+                        houseAlloted: newHouseIndex,
+                    };
+                }
+                return userData;
+            });
+            setUserDataForDept(updatedUserData);
+            setID(user.ID)
+            // const updatedHouseCoords = housecoords.map((house, index) => {
+            //     if (index === housecoords.length-1) {
+            //         console.log(house)
+            //         return {
+            //             ...house,
+            //             userid: user.ID,
+            //         };
+            //     }
+            //     return house;
+            // });
+            // setHouseCoords(updatedHouseCoords);
+            // console.log(housecoords)
+            // console.log(updatedHouseCoords)
+    
+            // Additional logic to update the database with the changes if necessary
+            // ...
+    
+            // Clear the selected user for allotment
+            setSelectedUserForAllotment(null);
+        };
+    
+        const userList = (
+            <UserList
+                users={UserDataForDept}
+                onAllotButtonClick={handleAllotButtonClick}
+            />
+        );
+    
+        // Open the new registrations list modal
+        openNewRegModal(userList);
+    };
+
     if (!isLoaded){
         return "Loading"
     }
@@ -398,11 +545,33 @@ function App()
                   <a href="/#">about us</a>
                   <a href="/#">contact</a>
                   <a href="/#">help</a>
-                  <a href="/#">complaint</a>
+                  <button onClick={openNewRegistrationsList}> NEW REGISTRATIONS </button>
                 </nav>
               </header>
           <Link to='#' className='menu-bars'>
             <i className='fas fa-paintbrush' onClick={showSidebar} style={{color: 'blueviolet'}}/>
+            {/* Profile */}
+          <nav className="navbar">
+                <div className="App">
+                <div className='menu-container' ref={menuRef}>
+                    <div className='menu-trigger' onClick={()=>{setOpen(!open)}}>
+                    <img src={user}></img>
+                    </div>
+
+                    <div className={`dropdown-menu ${open? 'active' : 'inactive'}`} style={{zIndex:10}} >
+                    <h3>The Kiet<br/><span>Website Designer</span></h3>
+                    <ul style={{zIndex:10}}>
+                        <DropdownItem img = {user} text = {"My Profile"}/>
+                        <DropdownItem img = {edit} text = {"Edit Profile"}/>
+                        <DropdownItem img = {inbox} text = {"Inbox"}/>
+                        <DropdownItem img = {settings} text = {"Settings"}/>
+                        <DropdownItem img = {help} text = {"Helps"}/>
+                        <DropdownItem img = {logout} text = {"Logout"}/>
+                    </ul>
+                    </div>
+                </div>
+                </div>
+            </nav>
           </Link>
         </div>
         <nav className={sidebar ? 'nav-menu active' : 'nav-menu'}>
@@ -412,9 +581,10 @@ function App()
                 {/* <AiIcons.AiOutlineClose /> */}
                 <i className='far fa-circle-xmark' onClick={showSidebar} style={{color: 'blueviolet'}}/>
               </Link>
-            
             </li>
-            /* {SidebarData.map((item, index) => {
+            {/* Drawing options */}
+            <div style={{zIndex:0}}>
+            {SidebarData.map((item, index) => {
               return (
                 <li key={index} className={item.cName}>
                   <Link onClick={item.onclick}>
@@ -423,6 +593,7 @@ function App()
                 </li>
               );
             })} 
+            </div>
           </ul>
         </nav>
     </IconContext.Provider>
@@ -538,10 +709,16 @@ function App()
                 {/* Add your content for the InfoWindow */}
                 <div>
                     <h3>HOUSE INFORMATION</h3>
-                    <p> house number : {housecoords[selectedhouseMarker].CANID}</p>
-                    <p>
+                    <p style={{fontSize:15}}> house number : <strong>{housecoords[selectedhouseMarker].CANID}</strong></p>
+                    <p style={{fontSize:15}}>USERID:<strong>{housecoords[selectedhouseMarker].userid}</strong></p>
+                    <p style={{fontSize:15}}>
                         Water Supply status:{' '}
-                        <button
+                        <button style={{
+                                color: isHovered ? 'rgb(74, 72, 205)' : 'black',
+                                marginLeft: 5,
+                            }}
+                            onMouseOver={() => setIsHovered(true)}
+                            onMouseOut={() => setIsHovered(false)}
                             onClick={() => toggleHouseWaterSupply(selectedhouseMarker)}
                         >
                             {housecoords[selectedhouseMarker].waterSupplied
@@ -549,9 +726,15 @@ function App()
                                 : 'NO'}
                         </button>
                     </p>
-                    <p> Junction to house : {housecoords[selectedhouseMarker].assignedJunction}</p>
+                    <p style={{fontSize:15}}> Junction to house : {housecoords[selectedhouseMarker].assignedJunction}</p>
                     <ButtonGroup>
-                        <button onClick={() => assignJunctionToHouse(housecoords[selectedhouseMarker])}>
+                        <button style={{
+                                color: isHovered ? 'rgb(74, 72, 205)' : 'black',
+                                marginLeft: 5,
+                            }}
+                            onMouseOver={() => setIsHovered(true)}
+                            onMouseOut={() => setIsHovered(false)}
+                            onClick={() => assignJunctionToHouse(housecoords[selectedhouseMarker])}>
                         ASSIGN JUNCTION
                         </button>
                     </ButtonGroup>
@@ -672,11 +855,30 @@ function App()
                         </ModalBody>
                    </ModalContent>
             </Modal>
+            <Modal isOpen={newRegModal} onClose={() => setNewRegModal(false)} blockScrollOnMount={false}>
+                 <ModalOverlay />
+                     <ModalContent bg="white" border="2px solid lightgreen" borderRadius="5px" p={10} top={70} left="30%" boxSize="40%">
+                         {/* <ModalHeader>Success!</ModalHeader> */}
+                         <ModalCloseButton style={{marginLeft:'97%',backgroundColor:'ButtonFace',color: 'ButtonText', border: 'ButtonShadow'}} />
+                        <ModalBody>
+                           {newRegModalContent.body}
+                        </ModalBody>
+                   </ModalContent>
+            </Modal>
         </Flex>
         </div>
     )
 }
 
+
+function DropdownItem(props){
+    return(
+      <li className = 'dropdownItem'>
+        <img src={props.img}></img>
+        <a> {props.text} </a>
+      </li>
+    );
+  }
 
 // function Navbar(props) {
 //     return (
