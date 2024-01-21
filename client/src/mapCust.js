@@ -1,7 +1,6 @@
 import {React,useState,useEffect} from 'react';
 import { useJsApiLoader, GoogleMap, Marker, Polyline, InfoWindow, StandaloneSearchBox } from "@react-google-maps/api";
 import {Flex,Box,HStack,Button,ButtonGroup,Modal,ModalOverlay,ModalContent,ModalHeader,ModalBody,ModalCloseButton} from "@chakra-ui/react";
-// import {AdvancedMarker,Pin} from '@vis.gl/react-google-maps' 
 import * as FaIcons from 'react-icons/fa';
 import * as AiIcons from 'react-icons/ai';
 import { Link } from 'react-router-dom';
@@ -11,10 +10,18 @@ import GreenHouseMarker from './greenhousemarker.jpeg'
 import RedHouseMarker from './redhousemarker.jpeg'
 import junctionmarker from './junctionmarker.jpeg'
 import waterreservoir from './waterreservoir.jpeg'
-import bg from './components/bg.jpg'
+import bg from './bg.jpg'
+import user from './img/user.png';
+import edit from './img/edit.png';
+import inbox from './img/envelope.png';
+import settings from './img/settings.png';
+import help from './img/question.png';
+import logout from './img/log-out.png';
+import logo from './img/logo-1.png'
+import './profile.css';
 import './App.css'
-import './components/Navbar.css'
-
+import './Navbar.css'
+import UserList from './UserList'
 
 
   
@@ -27,7 +34,7 @@ function App()
         libraries:MapLibraries,
     })
     const [ map, setMap] = useState('')
-    const [zoomLevel, setZoomLevel] = useState(17)
+    const [zoomLevel, setZoomLevel] = useState(17); // Initialize zoom level
     const [coordinates, setCoordinates] = useState([])
     const [ center, setCenter] = useState(origin)
     const [searchBox, setSearchBox] = useState(null);
@@ -39,48 +46,50 @@ function App()
     const [ defaultHouseCoords, setDefaultHouseCoords ] = useState([])
     const [ junctioncoords , setJunctionCoords] = useState([])
     const [ defaultjunctioncoords , setDefaultJunctionCoords ] = useState([])
-    const [waterReservoirCoords, setWaterReservoirCoords] = useState([])
     const [selectedHouseForJunction, setSelectedHouseForJunction] = useState(null);
+    const [waterReservoirCoords, setWaterReservoirCoords] = useState([])
+    const [selectedUserForAllotment, setSelectedUserForAllotment] = useState(null);
+    const [newRegistrationsListModalOpen, setNewRegistrationsListModalOpen] = useState(false);
+    const [isHouseMarkerAdded, setIsHouseMarkerAdded] = useState(false);
+    const [ houseAllotedEmail, setHouseAllotedEmail ] = useState({})
+    const [ housecoordsLength, setHousecoordsLength ] = useState(0)
+    const [UserDataForDept, setUserDataForDept] = useState([]);
     let [ subcoords, setSubCoords ] = useState([])
     const [ isModalOpen, setIsModalOpen ] = useState(false)
-    const [ isSubModalOpen, setIsSubModalOpen ] = useState(false)
-    const [ modalContent, setModalContent ] = useState({})
+    const [ raiseComplaintModal, setRaiseComplaintModal ] = useState(false)
+    const [ modalContent, SetModalContent ] = useState({})
+    const [ complaintsModal, setComplaintsModal ] = useState(false)
+    const [ complaintsModalContent, setComplaintsModalContent ] = useState({})
+    const [ newRegModal, setNewRegModal ] = useState(false)
+    const [ newRegModalContent, setNewRegModalContent ] = useState({})
+    const [ ID, setID ] = useState('')
     let [ markerFunction, setMarkerFunction ] = useState(0)
     const [waterQuantity, setWaterQuantity] = useState(1000)
     const [ description, setDescription ] = useState('')
+    const [ isHovered, setIsHovered ] = useState(false)
     const [sidebar, setSidebar] = useState(false);
     const showSidebar = () => setSidebar(!sidebar);
+    const [open, setOpen] = useState(false);
+    let menuRef = useRef();
     const navRef = useRef();
-    const openModal = (header,body) => {
-        if (header == "FAILED"){
-            setModalContent({
-              header: '❌'+header,
-              body: body,
-              border: "3px solid red"
-            });
-          }
-          else{
-            setModalContent({
-              header: '✅'+header,
-              body: body,
-              border: "3px solid lightgreen"
-            });
-          }
-        setIsSubModalOpen(true);
-        // Automatically close the modal after 2 seconds
-        setTimeout(() => {
-            setIsSubModalOpen(false);
-        }, 2000);
-    };
-    
-    let SidebarData = [
-        {
-          title: 'Raise a Complaint',
-          onclick:() =>{setIsModalOpen(true)},
-          cName: 'nav-text',
-        },
-      ];
 
+    useEffect(() => {
+    let handler = (e)=>{
+        if(!menuRef.current.contains(e.target)){
+        setOpen(false);
+        // console.log(menuRef.current);
+        }      
+    };
+
+    document.addEventListener("mousedown", handler);
+    
+
+    return() =>{
+        document.removeEventListener("mousedown", handler);
+    }
+
+    });
+    
     const onPlacesChanged = () => {
         const places = searchBox.getPlaces();
         if (places.length > 0) {
@@ -102,6 +111,7 @@ function App()
         else if (markerFunction == 2){
             const newhouse = {
                 CANID : "H" + (housecoords.length+1),
+                userid:ID,
                 hcoords : pos,
                 waterSupplied : true,
                 assignedJunction : null,
@@ -119,6 +129,9 @@ function App()
             }
             setJunctionCoords((prevjunctioncoords) => [...prevjunctioncoords,newjunction])
             //console.log(junctioncoords)
+        }
+        else if(markerFunction==4){
+            setWaterReservoirCoords((prevWaterReservoirCoords) => [...prevWaterReservoirCoords , pos])
         }
     }
 
@@ -140,6 +153,10 @@ function App()
 
     function junctionMarker(){
         setMarkerFunction(3)
+    }
+
+    function waterReservoir(){
+        setMarkerFunction(4)
     }
     
     function deleteLastHouse(){
@@ -260,9 +277,15 @@ function App()
         {
             setSelectedhouseMarker(index)
             setSelectedjunctionMarker(null)
-        }else if (markertype == 'junction'){
+        }
+        else if (markertype == 'junction'){
             setSelectedjunctionMarker(index)
             setSelectedhouseMarker(null)
+        }
+        else if (markertype == 'reservoir'){
+            setSelectedreservoir(index)
+            setSelectedhouseMarker(null)
+            setSelectedjunctionMarker(null)
         }
     };
 
@@ -276,6 +299,29 @@ function App()
         return Math.max(80 - zoomLevel * 3, 10);
     };
     
+    const openModal = (header,body) => {
+        if (header == "FAILED"){
+            SetModalContent({
+              header: '❌'+header,
+              body: body,
+              border: "3px solid red"
+            });
+          }
+          else{
+            SetModalContent({
+              header: '✅'+header,
+              body: body,
+              border: "3px solid lightgreen"
+            });
+          }
+        setIsModalOpen(true);
+        // Automatically close the modal after 2 seconds
+        setTimeout(() => {
+            setIsModalOpen(false);
+        }, 2000);
+    };
+
+
     useEffect(() => {
         const fetchCoordinates = async () => {
           try {
@@ -292,17 +338,47 @@ function App()
             setCoordinates(data.coordinates)
             setDefaultHouseCoords(data.housecoords)
             setHouseCoords(data.housecoords)
+            setHousecoordsLength(data.housecoords.length)
             setDefaultJunctionCoords(data.junctions)
             setJunctionCoords(data.junctions)
             setWaterReservoirCoords(data.waterReservoirCoords)
-        } catch (error) {
+            // console.log(data.junctions)
+            // data.housecoords.forEach(house => {
+            //     console.log(house.waterSupplied);
+            //   });
+            // data.junctions.forEach(junction => {
+            //     console.log(junction.waterSupplied);
+            //   });
+              
+            // console.log(defaultcoordinates)
+            // console.log(coordinates)
+          } catch (error) {
             console.error(error);
           }
         };
     
         fetchCoordinates();
-      }, []); 
+      }, []); // Empty dependency array ensures the effect runs only once
 
+
+    useEffect(() => {
+        const getID = async() =>{
+            const response = await fetch("http://localhost:5000/api/getID",{
+                method:'POST',
+                headers:{
+                    'Content-Type':'application/json',
+                }
+            })
+            const data = await response.json()
+            // console.log(data)
+            setID(data.ID)
+        } 
+        getID()
+    },[])
+
+    async function requestWater(){
+
+    }
 
     async function submitComplaints(event){
         event.preventDefault()
@@ -320,8 +396,6 @@ function App()
         console.log(data)
         if(data){
             openModal(data.status,data.message)
-        }
-        else{
         }
         } catch (error) {
             console.error("Error: ",error)
@@ -342,38 +416,45 @@ function App()
         opacity: '90%'}}>
         <IconContext.Provider value={{ color: '#fff' }}>
         <div className='navbar'> 
+        <img src={logo} style={{width:70,height:70,position:'absolute',left:'10px'}}/>
           <header>
                 <nav ref={navRef}>
                   <a href="/#">about us</a>
                   <a href="/#">contact</a>
-                  <a href="/#">help</a>
-                  <a href="/#">complaint</a>
+                  <button onClick={requestWater}> REQUEST EXTRA WATER</button>
+                  <button onClick={()=>setComplaintsModal(true)}> RAISE A COMPLAINT</button>
                 </nav>
               </header>
-          <Link to='#' className='menu-bars'>
-            <i className='fas fa-paintbrush' onClick={showSidebar} style={{color: 'blueviolet'}}/>
-          </Link>
+              {/* Profile */}
+          <nav className="navbar">
+                <div className="App">
+                <div className='menu-container' ref={menuRef}>
+                    <div className='menu-trigger' onClick={()=>{setOpen(!open)}}>
+                    <img src={user} style={{height:50,width:50}} ></img>
+                    </div>
+
+                    <div className={`dropdown-menu ${open? 'active' : 'inactive'}`} style={{zIndex:10}} >
+                    <h3>User Profile<br/><h4>ID:{ID}</h4></h3>
+                    <ul style={{zIndex:10}}>
+                        {/* <DropdownItem img = {user} text = {"My Profile"}/>
+                        <DropdownItem img = {edit} text = {"Edit Profile"}/>
+                        <DropdownItem img = {inbox} text = {"Inbox"}/>
+                        <DropdownItem img = {settings} text = {"Settings"}/>
+                        <DropdownItem img = {help} text = {"Helps"}/> */}
+                        <DropdownItem img = {logout} text = {"Logout"} onClick={()=>{
+                            openModal("Logging out...")
+                            setTimeout(()=>{
+                                window.location.href="/login"
+                            },2000)
+                            }}/>
+                    </ul>
+                    </div>
+                </div>
+                </div>
+            </nav>
+          
         </div>
-        <nav className={sidebar ? 'nav-menu active' : 'nav-menu'}>
-          <ul className='nav-menu-items' >
-            <li className='navbar-toggle'>
-              <Link to='#' className='menu-bars'>
-                {/* <AiIcons.AiOutlineClose /> */}
-                <i className='far fa-circle-xmark' onClick={showSidebar} style={{color: 'blueviolet'}}/>
-              </Link>
-            
-            </li>
-            /* {SidebarData.map((item, index) => {
-              return (
-                <li key={index} className={item.cName}>
-                  <Link onClick={item.onclick}>
-                    <span>{item.title}</span>
-                  </Link>
-                </li>
-              );
-            })} 
-          </ul>
-        </nav>
+        
     </IconContext.Provider>
         {map && (
                 <StandaloneSearchBox
@@ -389,7 +470,7 @@ function App()
                     width: `300px`,
                     height: `32px`,
                     marginTop:'20px',
-                    marginLeft:'180px',
+                    marginLeft:'50px',
                     borderRadius: `3px`,
                     boxShadow: `0 2px 6px rgba(0, 0, 0, 0.3)`,
                     fontSize: `14px`,
@@ -412,7 +493,7 @@ function App()
             center={center} 
             zoom={zoomLevel}
             onZoomChanged={handleZoomChanged}
-            mapContainerStyle={{width:"80%", height:"80%",left:"150px",top:"-10px"}}
+            mapContainerStyle={{width:"95%", height:"80%",left:"30px",top:"-15px"}}
             options={{
                 streetViewControl:false,
                 mapTypeControl:false,
@@ -433,8 +514,6 @@ function App()
             }}
             onLoad={(map) => setMap(map) }
             onClick={(event) => addMarker(event.latLng)}>
-            
-            {/* onRightClick={(event) => houseMarker(event.latLng)}> */}
 
             {/* Displaying markers */}
             {/* {showMarkers && map && <Marker position={origin} />} */}
@@ -456,10 +535,13 @@ function App()
                     scaledSize:new window.google.maps.Size(20,20)}} /> 
                 ))}
 
-            {/* {showMarkers && subcoords.map((coords,index) => (
-                    <Marker key={index} position={coords} />
-                )    
-            )} */}
+            {waterReservoirCoords.map((waterReservoircoord,index) => (
+                <Marker key={index + 1} position={waterReservoircoord} onClick={() => markerIndex(index,'reservoir')} 
+                icon={{
+                    url:waterreservoir,
+                    scaledSize:new window.google.maps.Size(Math.max(20, 100 / Math.pow(2, 17 - zoomLevel)),Math.max(20, 100 / Math.pow(2, 17 - zoomLevel)))}} /> 
+                ))}
+
 
             {/* Draw default polyline */}    
             {defaultcoordinates.map((lineArray,lineIndex) => (
@@ -470,13 +552,6 @@ function App()
             {coordinates.map((lineArray,lineIndex) => (
                 <Polyline path={lineArray} key={lineIndex} options={{strokeColor:"deepskyblue",strokeOpacity:1}} />
             ))}
-
-            {waterReservoirCoords.map((waterReservoircoord,index) => (
-                <Marker key={index + 1} position={waterReservoircoord} onClick={() => markerIndex(index,'reservoir')} 
-                icon={{
-                    url:waterreservoir,
-                    scaledSize:new window.google.maps.Size(Math.max(20, 120 / Math.pow(2, 17 - zoomLevel)),Math.max(20, 120 / Math.pow(2, 17 - zoomLevel)))}} /> 
-                ))}
             
             {/* Display InfoWindow when a house is selected */}
             {selectedhouseMarker !== null && (
@@ -487,11 +562,47 @@ function App()
                 {/* Add your content for the InfoWindow */}
                 <div>
                     <h3>HOUSE INFORMATION</h3>
-                    <p> house number : {housecoords[selectedhouseMarker].CANID}</p>
-                    <p>
-                        Water Supply status:{housecoords[selectedhouseMarker].waterSupplied?'YES':'NO'}
+                    <p style={{fontSize:15}}> house number : <strong>{housecoords[selectedhouseMarker].CANID}</strong></p>
+                    <p style={{fontSize:15}}>USERID:<strong>{housecoords[selectedhouseMarker].userid}</strong></p>
+                    <p style={{fontSize:15}}>
+                        Water Supply status:{' '}
+                        <button style={{
+                                color: isHovered ? 'rgb(74, 72, 205)' : 'black',
+                                marginLeft: 5,
+                            }}
+                            onMouseOver={() => setIsHovered(true)}
+                            onMouseOut={() => setIsHovered(false)}
+                            onClick={() => toggleHouseWaterSupply(selectedhouseMarker)}
+                        >
+                            {housecoords[selectedhouseMarker].waterSupplied
+                                ? 'YES'
+                                : 'NO'}
+                        </button>
                     </p>
-                    <p> Junction to house : {housecoords[selectedhouseMarker].assignedJunction}</p>
+                    <p style={{fontSize:15}}> Junction to house : {housecoords[selectedhouseMarker].assignedJunction}</p>
+                    <ButtonGroup>
+                        <button style={{
+                                color: isHovered ? 'rgb(74, 72, 205)' : 'black',
+                                marginLeft: 5,
+                            }}
+                            onMouseOver={() => setIsHovered(true)}
+                            onMouseOut={() => setIsHovered(false)}
+                            onClick={() => assignJunctionToHouse(housecoords[selectedhouseMarker])}>
+                        ASSIGN JUNCTION
+                        </button>
+                    </ButtonGroup>
+                    {selectedHouseForJunction === housecoords[selectedhouseMarker] && (
+                        <div>
+                            <h4>Select a Junction</h4>
+                            <ButtonGroup>
+                                {junctioncoords.map((junction, index) => (
+                                    <Button key={index} onClick={() => assignJunctionToSelectedHouse(junction)}>
+                                        {junction.JID}
+                                    </Button>
+                                ))}
+                            </ButtonGroup>
+                        </div>
+                    )}
 
                 </div>
                 </InfoWindow>
@@ -509,7 +620,14 @@ function App()
                     <p> Junction number : {junctioncoords[selectedjunctionMarker].JID}</p>
                     <p> Houses under junction : {junctioncoords[selectedjunctionMarker].houses.join(', ')}</p>
                     <p> 
-                        Water supply status:{junctioncoords[selectedjunctionMarker].waterSupplied?'YES':'NO'}
+                        Water supply status:{' '}
+                        <button
+                            onClick={() => toggleJunctionWaterSupply(selectedjunctionMarker)}
+                        >
+                            {junctioncoords[selectedjunctionMarker].waterSupplied
+                                ? 'YES'
+                                : 'NO'}
+                        </button>
                     </p>
                 </div>
                 </InfoWindow>
@@ -524,14 +642,25 @@ function App()
                 <div>
                 <h3>RESERVOIR INFORMATION</h3>
                 <p>Water Quantity: {waterQuantity}</p>
+                {/* <Button onClick={handleSupplyWater}>Supply Water</Button> */}
                 </div>
             </InfoWindow>
             )}
 
 
             </GoogleMap> 
+        {/* Modal for success message */}
+              <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} blockScrollOnMount={false}>
+                 <ModalOverlay />
+                     <ModalContent bg="white" border={modalContent.border} borderRadius="5px" p={10} top={70} left="40%" boxSize="15%">
+                     <ModalHeader style={{marginLeft:50}}>{modalContent.header}</ModalHeader>
+                        <ModalBody>
+                           {modalContent.body}
+                        </ModalBody>
+                   </ModalContent>
+            </Modal>
         {/* Modal for submitting complaint */}
-        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} blockScrollOnMount={false}>
+        <Modal isOpen={complaintsModal} onClose={() => setComplaintsModal(false)} blockScrollOnMount={false}>
         <ModalOverlay />
             <ModalContent bg="white" border="2px solid red" borderRadius="5px" p={10} top={120} left="20%" boxSize="60%" style={{height:"75%"}}>
             <ModalCloseButton style={{marginLeft:'97%'}} />
@@ -556,25 +685,21 @@ function App()
                 </ModalBody>
             </ModalContent>
         </Modal>
-        {/* Modal for displaying success message */}
-        <Modal isOpen={isSubModalOpen} onClose={() => setIsSubModalOpen(false)} blockScrollOnMount={false}>
-        <ModalOverlay />
-        <ModalContent bg="white" border={modalContent.border} borderRadius="5px" p={10} top={70} left="40%" boxSize="18%">
-        <ModalHeader style={{marginLeft:65}}>{modalContent.header}</ModalHeader>
-            <ModalBody>
-                {modalContent.body}
-            </ModalBody>
-        </ModalContent>
-        </Modal>
         </Flex>
         </div>
     )
 }
 
 
+function DropdownItem(props){
+    return(
+      <li className = 'dropdownItem' onClick={props.onClick}>
+        <img src={props.img}></img>
+        <a> {props.text} </a>
+      </li>
+    );
+  }
+
+
 
 export default App
-
-
-
-

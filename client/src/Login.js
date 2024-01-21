@@ -3,7 +3,6 @@ import {Link} from 'react-router-dom'
 import {Flex,Box,HStack,Button,ButtonGroup,Modal,ModalOverlay,ModalContent,ModalHeader,ModalBody,ModalCloseButton, Center} from "@chakra-ui/react";
 import './App.css'
 import bg4 from './bg-2.jpeg';
-import './test2.css';
 import  sideart from './login-bg.jpg';
 import logo1 from './logo-1.png';
 
@@ -34,15 +33,6 @@ function App()
     setIsModalOpen(true);
     // Automatically close the modal after 2 seconds
     setTimeout(() => {
-      // if (header == "SUCCESS"){
-      //   if (role=="Department"){
-      //     window.location.href="/mapDepartment"
-      //   }
-      //   else if (role=="Customer"){
-      //     window.location.href="/mapCustomer"
-      //   }
-      // }
-      
       setIsModalOpen(false);
     }, 2000);
   };
@@ -133,7 +123,7 @@ function App()
         display: 'grid',
         placeItems: 'center'}}>
 
-        <div className='container'>
+        <div className='container' style={{zIndex:0}}>
           <img src={logo1} className='logo-login'></img>
           <a onClick={()=>window.location.href='/newHome'} className='homeone'>Home</a>
           <HStack>
@@ -164,7 +154,7 @@ function App()
           </div>
           <input className='login-button' type='submit' value='Login'></input>
           <div className='modal-box'>
-          <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} blockScrollOnMount={false}>
+          <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} blockScrollOnMount={false} >
               <ModalOverlay />
                   <ModalContent bg="white" border={modalContent.border} borderRadius="5px" p={4} top={100} left="65%" boxSize="18%" >
                       <ModalHeader style={{marginLeft:60}}>{modalContent.header}</ModalHeader>

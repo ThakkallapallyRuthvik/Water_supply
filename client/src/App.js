@@ -10,10 +10,8 @@ import MapCust from './mapCust';
 import RequestPasswordReset from './pages/requestReset';
 import ResetPassword from './pages/resetPassword';
 import Test from './test2';
-import Home from './pages/Home';
-import Products from './pages/Products';
-import Reports from './pages/Reports';
-
+import Profile from './profile'
+import NewReg from './register/register/test3'
 
 const App = () => {
   return (
@@ -29,9 +27,8 @@ const App = () => {
           <Route path="/mapCustomer" element={<MapCust/>} />
           <Route path="/requestPasswordReset" element={<RequestPasswordReset/>} />
           <Route path="/resetPassword" element={<ResetPassword/>} />
-          <Route path="/home" element={<Home/>} />
-          <Route path="/products" element={<Products/>} />
-          <Route path="/reports" element={<Reports/>} />
+          <Route path="/profile" element={<Profile/>} />
+          <Route path="newreg" element={<NewReg />} />
           {/* Add a default route for the root path */}
           <Route path="/" element={<Register />} />
         </Routes>

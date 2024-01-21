@@ -6,6 +6,7 @@ html {
     padding:0;
     font-family: 'Titillium Web', sans-serif;
     background: #243b55; 
+    overflow: hidden;
     /* linear-gradient(#141e30, #243b55) */
   }
 
@@ -19,7 +20,7 @@ html {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 3;
+    z-index: 10000;
   }
 
   .container{

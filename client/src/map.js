@@ -1,7 +1,6 @@
 import {React,useState,useEffect} from 'react';
 import { useJsApiLoader, GoogleMap, Marker, Polyline, InfoWindow, StandaloneSearchBox } from "@react-google-maps/api";
 import {Flex,Box,HStack,Button,ButtonGroup,Modal,ModalOverlay,ModalContent,ModalHeader,ModalBody,ModalCloseButton} from "@chakra-ui/react";
-// import {AdvancedMarker,Pin} from '@vis.gl/react-google-maps' 
 import * as FaIcons from 'react-icons/fa';
 import * as AiIcons from 'react-icons/ai';
 import { Link } from 'react-router-dom';
@@ -18,6 +17,7 @@ import inbox from './img/envelope.png';
 import settings from './img/settings.png';
 import help from './img/question.png';
 import logout from './img/log-out.png';
+import logo from './img/logo-1.png'
 import './profile.css';
 import './App.css'
 import './Navbar.css'
@@ -51,10 +51,14 @@ function App()
     const [selectedUserForAllotment, setSelectedUserForAllotment] = useState(null);
     const [newRegistrationsListModalOpen, setNewRegistrationsListModalOpen] = useState(false);
     const [isHouseMarkerAdded, setIsHouseMarkerAdded] = useState(false);
+    const [ houseAllotedEmail, setHouseAllotedEmail ] = useState({})
+    const [ housecoordsLength, setHousecoordsLength ] = useState(0)
     const [UserDataForDept, setUserDataForDept] = useState([]);
     let [ subcoords, setSubCoords ] = useState([])
     const [ isModalOpen, setIsModalOpen ] = useState(false)
     const [ modalContent, SetModalContent ] = useState({})
+    const [ complaintsModal, setComplaintsModal ] = useState(false)
+    const [ complaintsModalContent, setComplaintsModalContent ] = useState({})
     const [ newRegModal, setNewRegModal ] = useState(false)
     const [ newRegModalContent, setNewRegModalContent ] = useState({})
     const [ ID, setID ] = useState('')
@@ -71,31 +75,38 @@ function App()
           title: 'Draw Line',
           onclick:drawLine,
           cName: 'nav-text',
+          img: require('./img/newline.png')
         },
         {
           title: 'House Marker',
           onclick:houseMarker,
-          cName: 'nav-text'
+          cName: 'nav-text',
+          img: require('./img/housemarker.png')
         },
         {
           title: 'Junction',
           onclick:junctionMarker,
-          cName: 'nav-text'
+          cName: 'nav-text',
+          img: require('./img/junctionmarker.png')
+        
         },
         {
           title: 'Delete Last Line',
           onclick:deleteLastLine,
-          cName: 'nav-text'
+          cName: 'nav-text',
+          img: require('./img/removeline.png')
         },
         {
           title: 'Delete Last House',
           onclick:deleteLastHouse,
-          cName: 'nav-text'
+          cName: 'nav-text',
+          img: require('./img/removehousemarker.png')
         },
         {
           title: 'Delete Last Junction',
           onclick:deleteLastJunction,
-          cName: 'nav-text'
+          cName: 'nav-text',
+          img: require('./img/removejunction.png')
         },
         // {
         //     title:'Reservoir',
@@ -104,11 +115,13 @@ function App()
         // },
         {
           title:'Submit',
-          onclick:async ()=>{
+          onclick:async() => {
             await submitCoordinates();
+            await sendHouseAllotedEmail();
             await submitUserData();
           },
-          cName:'nav-text'
+          cName:'nav-text',
+          img: require('./img/submitcoords.png')
         }
       ];
 
@@ -377,6 +390,7 @@ function App()
             setCoordinates(data.coordinates)
             setDefaultHouseCoords(data.housecoords)
             setHouseCoords(data.housecoords)
+            setHousecoordsLength(data.housecoords.length)
             setDefaultJunctionCoords(data.junctions)
             setJunctionCoords(data.junctions)
             setWaterReservoirCoords(data.waterReservoirCoords)
@@ -425,6 +439,37 @@ function App()
         fetchEligibleUsers();
     }, []);
     
+
+    async function sendHouseAllotedEmail(event) {
+        if(event){
+            event.preventDefault()
+        }
+        if(housecoords.length>housecoordsLength){
+            try {
+                const lastHouse = housecoords[housecoords.length - 1];
+                const response = await fetch('http://localhost:5000/api/houseAllotedEmail', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    UserID:lastHouse.userid,
+                    HouseID:lastHouse.CANID
+                }),
+                });
+
+                const data = await response.json();
+
+                if (data) {
+                openModal('✅ Email sent successfully');
+                }
+            } catch (error) {
+                openModal('❌ Error sending email');
+                console.error('Error: ', error);
+            }
+        }
+    };
+
     async function submitCoordinates(event){
         if(event){
             event.preventDefault()
@@ -451,6 +496,35 @@ function App()
             openModal('❌Error submitting coordinates');
             console.error("Error: ",error)
         }      
+    }
+
+    async function viewComplaints(event){
+        event.preventDefault()
+        try{
+            const response = await fetch('http://localhost:5000/api/mapDept/viewComplaints',{
+                method:'POST',
+                headers:{
+                    'Content-Type':'application/json'
+                },
+            })
+            const data = await response.json()
+            // console.log(data)
+            if(data.length!=0){
+                const complaintsData = data.map(item => ({
+                    ID:item.ID,
+                    description:item.description,
+                }))
+                setComplaintsModalContent(complaintsData)
+            }
+            else{
+                setComplaintsModalContent({
+                    data:"No data"
+                })
+            }
+            setComplaintsModal(true)
+            } catch (error) {
+                console.error("Error: ",error)
+            }      
     }
 
     const submitUserData = async () => {
@@ -526,6 +600,7 @@ function App()
         openNewRegModal(userList);
     };
 
+
     if (!isLoaded){
         return "Loading"
     }
@@ -540,62 +615,45 @@ function App()
         opacity: '90%'}}>
         <IconContext.Provider value={{ color: '#fff' }}>
         <div className='navbar'> 
+        <img src={logo} style={{width:70,height:70,position:'absolute',left:'10px'}}/>
           <header>
                 <nav ref={navRef}>
                   <a href="/#">about us</a>
                   <a href="/#">contact</a>
-                  <a href="/#">help</a>
+                  <button onClick={viewComplaints}> VIEW COMPLAINTS</button>
                   <button onClick={openNewRegistrationsList}> NEW REGISTRATIONS </button>
                 </nav>
               </header>
-          <Link to='#' className='menu-bars'>
-            <i className='fas fa-paintbrush' onClick={showSidebar} style={{color: 'blueviolet'}}/>
-            {/* Profile */}
+              {/* Profile */}
           <nav className="navbar">
                 <div className="App">
                 <div className='menu-container' ref={menuRef}>
                     <div className='menu-trigger' onClick={()=>{setOpen(!open)}}>
-                    <img src={user}></img>
+                    <img src={user} style={{height:50,width:50}} ></img>
                     </div>
 
                     <div className={`dropdown-menu ${open? 'active' : 'inactive'}`} style={{zIndex:10}} >
-                    <h3>The Kiet<br/><span>Website Designer</span></h3>
+                    <h3>User Profile<br/></h3>
                     <ul style={{zIndex:10}}>
-                        <DropdownItem img = {user} text = {"My Profile"}/>
+                        {/* <DropdownItem img = {user} text = {"My Profile"}/>
                         <DropdownItem img = {edit} text = {"Edit Profile"}/>
                         <DropdownItem img = {inbox} text = {"Inbox"}/>
                         <DropdownItem img = {settings} text = {"Settings"}/>
-                        <DropdownItem img = {help} text = {"Helps"}/>
-                        <DropdownItem img = {logout} text = {"Logout"}/>
+                        <DropdownItem img = {help} text = {"Helps"}/> */}
+                        <DropdownItem img = {logout} text = {"Logout"} onClick={()=>{
+                            openModal("Logging out...")
+                            setTimeout(() => {
+                                window.location.href='/login'
+                            }, 2000);
+                            }}/>
                     </ul>
                     </div>
                 </div>
                 </div>
             </nav>
-          </Link>
+          
         </div>
-        <nav className={sidebar ? 'nav-menu active' : 'nav-menu'}>
-          <ul className='nav-menu-items' >
-            <li className='navbar-toggle'>
-              <Link to='#' className='menu-bars'>
-                {/* <AiIcons.AiOutlineClose /> */}
-                <i className='far fa-circle-xmark' onClick={showSidebar} style={{color: 'blueviolet'}}/>
-              </Link>
-            </li>
-            {/* Drawing options */}
-            <div style={{zIndex:0}}>
-            {SidebarData.map((item, index) => {
-              return (
-                <li key={index} className={item.cName}>
-                  <Link onClick={item.onclick}>
-                    <span>{item.title}</span>
-                  </Link>
-                </li>
-              );
-            })} 
-            </div>
-          </ul>
-        </nav>
+        
     </IconContext.Provider>
         {map && (
                 <StandaloneSearchBox
@@ -611,7 +669,7 @@ function App()
                     width: `300px`,
                     height: `32px`,
                     marginTop:'20px',
-                    marginLeft:'180px',
+                    marginLeft:'50px',
                     borderRadius: `3px`,
                     boxShadow: `0 2px 6px rgba(0, 0, 0, 0.3)`,
                     fontSize: `14px`,
@@ -634,7 +692,7 @@ function App()
             center={center} 
             zoom={zoomLevel}
             onZoomChanged={handleZoomChanged}
-            mapContainerStyle={{width:"80%", height:"80%",left:"150px",top:"-10px"}}
+            mapContainerStyle={{width:"95%", height:"80%",left:"30px",top:"-15px"}}
             options={{
                 streetViewControl:false,
                 mapTypeControl:false,
@@ -655,6 +713,34 @@ function App()
             }}
             onLoad={(map) => setMap(map) }
             onClick={(event) => addMarker(event.latLng)}>
+
+        <Link to='#' className='menu-bars' style={{zIndex:10}}>
+            <i className='fas fa-bars' onClick={showSidebar} style={{color: 'blueviolet',marginLeft:1300,marginTop:28,zIndex:11,position:'absolute'}}/>
+            
+          </Link>
+        <nav className={sidebar ? 'nav-menu active' : 'nav-menu'}>
+          <ul className='nav-menu-items' >
+            <li className='navbar-toggle'>
+              <Link to='#' className='menu-bars'>
+                {/* <AiIcons.AiOutlineClose /> */}
+                <i className='far fa-circle-xmark' onClick={showSidebar} style={{color: 'blueviolet',zIndex:100}}/>
+              </Link>
+            </li>
+            {/* Drawing options */}
+            <div style={{zIndex:100000}}>
+            {SidebarData.map((item, index) => {
+              return (
+                <li key={index} className={item.cName}>
+                  <Link onClick={item.onclick}>
+                    {/* <span>{item.title}</span> */}
+                    <img src={item.img} title={item.title} />
+                  </Link>
+                </li>
+              );
+            })} 
+            </div>
+          </ul>
+        </nav>
             
             {/* onRightClick={(event) => houseMarker(event.latLng)}> */}
 
@@ -682,7 +768,7 @@ function App()
                 <Marker key={index + 1} position={waterReservoircoord} onClick={() => markerIndex(index,'reservoir')} 
                 icon={{
                     url:waterreservoir,
-                    scaledSize:new window.google.maps.Size(Math.max(20, 120 / Math.pow(2, 17 - zoomLevel)),Math.max(20, 120 / Math.pow(2, 17 - zoomLevel)))}} /> 
+                    scaledSize:new window.google.maps.Size(Math.max(20, 100 / Math.pow(2, 17 - zoomLevel)),Math.max(20, 100 / Math.pow(2, 17 - zoomLevel)))}} /> 
                 ))}
 
             {/* {showMarkers && subcoords.map((coords,index) => (
@@ -796,54 +882,6 @@ function App()
 
 
             </GoogleMap> 
-        {/* <Box
-        position='absolute'
-        p={4}
-        borderRadius='lg'
-        mt={4}
-        bgColor='skyblue'
-        shadow='base'
-        minW='container.md'
-        zIndex='modal'
-        w='50%'
-        h='6%'
-        top="5%"            
-        left="65%"           
-        transform="translate(-50%, -50%)"
-        >
-        <HStack spacing={4}>
-        <ButtonGroup height="100%">
-            <Button bgColor="white" position="absolute" type="button" height="50%" 
-            width="20%" onClick={drawLine}>
-            Draw new line
-            </Button>
-            <Button bgColor="white" position="absolute" type="button" height="50%"
-             width="20%" left="20%" onClick={houseMarker}>
-            House Marker
-            </Button>
-            <Button bgColor="white" position="absolute" type="submit" 
-            left="40.5%" height="50%" width="20%" onClick={deleteLastLine}>
-            Delete last line
-            </Button>
-            <Button bgColor="white" position="absolute" type="submit" 
-            left="61%" height="50%" width="19%" onClick={deleteLastHouse}>
-            Delete last house
-            </Button>
-            <Button bgColor="white" position="absolute" type="submit" 
-            left="80.5%" height="50%" width="18%" onClick={junctionMarker}>
-            New Junction
-            </Button>
-            <Button bgColor="white" position="absolute" type="submit" 
-            left="99%" height="50%" width="19%" onClick={deleteLastJunction}>
-            Delete Last Junction
-            </Button>
-            <Button bgColor="white" position="absolute" type="submit" 
-            left="118.25%" height="50%" width="18%" onClick={submitCoordinates}>
-            Submit
-            </Button>
-        </ButtonGroup>
-        </HStack>
-        </Box> */}
         {/* Modal for success message */}
               <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} blockScrollOnMount={false}>
                  <ModalOverlay />
@@ -855,15 +893,44 @@ function App()
                         </ModalBody>
                    </ModalContent>
             </Modal>
+            {/* Modal for displaying New Registrations */}
             <Modal isOpen={newRegModal} onClose={() => setNewRegModal(false)} blockScrollOnMount={false}>
                  <ModalOverlay />
-                     <ModalContent bg="white" border="2px solid lightgreen" borderRadius="5px" p={10} top={70} left="30%" boxSize="40%">
+                     <ModalContent bg="white" border="1px solid" borderRadius="5px" p={10} top={70} left="30%" boxSize="40%">
                          {/* <ModalHeader>Success!</ModalHeader> */}
                          <ModalCloseButton style={{marginLeft:'97%',backgroundColor:'ButtonFace',color: 'ButtonText', border: 'ButtonShadow'}} />
                         <ModalBody>
                            {newRegModalContent.body}
                         </ModalBody>
                    </ModalContent>
+            </Modal>
+            {/* Modal for viewing Complaints */}
+            <Modal isOpen={complaintsModal} onClose={() => setComplaintsModal(false)} blockScrollOnMount={false}>
+                <ModalOverlay />
+                    <ModalContent bg="white" border="1px solid" borderRadius="5px" p={10} top={70} left="20%" boxSize="60%" style={{height:"75%"}}>
+                        {/* <ModalHeader>Success!</ModalHeader> */}
+                        <ModalCloseButton style={{marginLeft:'97%',backgroundColor:'ButtonFace',color: 'ButtonText', border: 'ButtonShadow'}} />
+                    <ModalBody style={{overflowY:'auto',maxHeight:'85vh'}}>
+                    <h1 style={{textAlign:"center"}}>REGISTERED COMPLAINTS</h1>
+                    <hr style={{marginTop:10,marginBottom:20,border:"1px solid"}}/>
+                    {complaintsModalContent.length>1 && complaintsModalContent.map((complaint, index) => (
+                    <p key={index} style={{marginTop:13}}> 
+                        ID : <strong>{complaint.ID}</strong> 
+                        <br />
+                        Description : <strong>{complaint.description}</strong>
+                        <button style={{marginLeft:680,width:100,fontSize:15,background:'skyblue',border:'none',borderRadius:'7px'}}>Resolve</button>
+                        <hr style={{marginTop:10}}/>
+                    </p>
+                ))}
+                    {complaintsModalContent.data=='No data' &&  (
+                        <div>
+                        <br/>
+                        <h1 style={{textAlign:'center'}}>------NO NEW REGISTRATIONS------</h1>
+                        <br/>
+                        </div>
+                    )}
+                    </ModalBody>
+                </ModalContent>
             </Modal>
         </Flex>
         </div>
@@ -873,30 +940,13 @@ function App()
 
 function DropdownItem(props){
     return(
-      <li className = 'dropdownItem'>
+      <li className = 'dropdownItem' onClick={props.onClick}>
         <img src={props.img}></img>
         <a> {props.text} </a>
       </li>
     );
   }
 
-// function Navbar(props) {
-//     return (
-//       <nav className="navbar">
-//         <ul className="navbar-nav">{props.children}</ul>
-//       </nav>
-//     );
-//   }
-  
-//   function NavItem({ icon, onClick }) {
-//     return (
-//         <li className="nav-item">
-//             <a href="#" className="icon-button" onClick={onClick}>
-//                 {icon}
-//             </a>
-//         </li>
-//     );
-// }
 
 
 export default App
