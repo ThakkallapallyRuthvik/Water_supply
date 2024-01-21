@@ -8,7 +8,7 @@ const UserSchema = new Schema({
     password: String,
     role:String,
     add:String,
-    houseAlloted:Boolean,
+    houseAlloted:String,
     verified : Boolean
 });
 

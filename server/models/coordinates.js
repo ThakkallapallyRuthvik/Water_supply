@@ -6,6 +6,7 @@ const coordinates = new mongoose.Schema(
         // housecoords : {type:Array,required:true},
         housecoords : [{
             CANID : { type: String, required: true },
+            userid : {type:String},
             hcoords : { type: Object },
             waterSupplied : {type: Boolean },
             assignedJunction : { type: String },

@@ -5,6 +5,7 @@ const complaints = new mongoose.Schema(
         ID:String,
         // HouseID:String,
         description:String,
+        status:String,
         datecomplained:Date,
         dateresolved:Date,
     },
