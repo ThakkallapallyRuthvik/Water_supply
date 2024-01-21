@@ -44,7 +44,7 @@ let ID;
 //signup
 app.post("/api/register", async (req, res) => {
   ID = uuidv4().slice(0,7);
-  let { name, email, password, role, add } = req.body;
+  let { name, email, password, cp ,  role, add } = req.body;
   if (name === "" || password === "" || email === "" || add === "" ) {
       return res.json({
           status: "FAILED",
@@ -96,7 +96,7 @@ app.post("/api/register", async (req, res) => {
                         role,
                         verified: false,
                         add,
-                        houseAlloted:false,
+                        houseAlloted:"None",
                     });
                 }
                 else{
@@ -391,6 +391,7 @@ app.get("/verified", (req, res) => {
     let {email, password} = req.body;
 email = email.trim();
 password = password.trim();
+const userdoc = await User.findOne({email:email})
 
 if (!email || !password) {
     return res.json({
@@ -398,6 +399,16 @@ if (!email || !password) {
         message: "Empty credentials supplied!",
     });
 } else {
+    if(userdoc){
+        // console.log(userdoc)
+        const houseAlloted = userdoc.houseAlloted
+        if(houseAlloted=="None"){
+            return res.json({
+                status:"FAILED",
+                message:"You have not been allocated a house, please try again later!"
+            })
+        }
+    }
     // check if user exists
     User
     .findOne({email})
@@ -713,30 +724,145 @@ app.post("/api/default",async(req,res) =>{
     }
 })
 
+app.post("/api/eligibleusers", async (req, res) => {
+    try {
+        const eligibleUsers = await User.find({ role: 'Customer', houseAllotted: null });
+        // console.log(eligibleUsers)
+        res.json(eligibleUsers);
+    } catch (error) {
+        console.error('Error fetching eligible users:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+app.post("/api/saveupdateddata", async (req, res) => {
+    try {
+        const updatedUserData = req.body.updatedUserData;
+
+        // Ensure that updatedUserData is an array
+        if (!Array.isArray(updatedUserData)) {
+            return res.status(400).json({ error: 'Invalid input format' });
+        }
+
+        for (const userData of updatedUserData) {
+            const { name, houseAlloted } = userData;
+
+            // Check if name and houseAlloted are present
+            if (!name || houseAlloted === undefined) {
+                continue; // Skip this iteration if data is incomplete
+            }
+
+            // Use async/await to wait for the update operation to complete
+            await User.updateOne({ name }, { $set: { houseAlloted } });
+        }
+
+        res.json({ status: 'SUCCESS', message: 'User data updated successfully' });
+    } catch (error) {
+        console.error('Error saving updated user data:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+app.post("/api/houseAllotedEmail",async(req,res) => {
+    const { HouseID, UserID } = req.body;
+    // console.log(HouseID,UserID)
+    const userdoc = await User
+    .findOne({ID:UserID})
+    .catch((error) => {
+        console.log(error);
+        res.json({
+            status: "FAILED",
+            message: "Failed to send email",
+        });
+    });
+    // console.log(userdoc)
+    if (!userdoc) {
+        return res.json({
+          status: "FAILED",
+          message: "User not found",
+        });
+      }
+    if(userdoc){
+        const userEmail = userdoc.email;
+        const mailOptions = {
+            from: process.env.AUTH_EMAIL,
+            to: userEmail,
+            subject: "House Alloted",
+            html: `<p>User: ${UserID} </p>
+            <p>Your house has been alloted to <b>${HouseID}</b></p>
+            <p>You can proceed to login</p>`,
+        };
+        transporter
+        .sendMail(mailOptions)
+        .then(() => {
+            // email sent and verification record saved
+            res.json({
+                status: "SUCCESS",
+                message: "House Alloted successfully",
+            });
+        })
+        .catch((error) => {
+            console.log(error);
+            res.json({
+                status: "FAILED",
+                message: "Failed to send email",
+            });
+        });
+    } 
+
+    
+})
+
+app.post("/api/mapDept/viewComplaints",async(req,res) => {
+    const viewComplaints = await Complaints.find({status:'Active'})
+    // console.log(viewComplaints)
+    res.json(viewComplaints)
+  })
+
+  app.post("/api/mapDept/resolveComplaints",async(req,res) => {
+    const {id} = req.body;
+    // const complaint = 
+    await Complaints.updateOne({ID:id,status:"Active"},{$set:{status:"Resolved",dateresolved:Date.now()}})
+    await Coordinates.updateOne({'housecoords.userid':id},{$set:{'housecoords.$.waterSupplied':true}})
+    return res.json({status:'SUCCESS',message:'Complaint resolved!'})
+  })
+
+  app.post("/api/getID",async(req,res) => {
+    return res.json({ID:ID})
+  })
+
   app.post("/api/mapCust/:ID",async(req,res) => {
-    console.log("Submitted")
-    console.log(ID)
+    // console.log(ID)
     const {description} = req.body;
+    const existingComplaint = await Complaints.find({ID:ID,status:"Active"})
     if (description==""){
         res.json({
             status:"FAILED",
             message:"Please describe your problem"
+        })
+    }else if(existingComplaint.length>0){
+        res.json({
+            status:"FAILED",
+            message:"You have already raised a complaint, please wait until it is resolved and then complaint again"
         })
     }else{
     const complaints = await Complaints.create({
         ID:ID,
         // HouseID:req.body.HouseID,
         description:req.body.description,
+        status:"Active",
         datecomplained:Date.now(),
-        dateresolved:Date.now()+100000,
+        // dateresolved:Date.now(),
     })
+    await Coordinates.updateOne({'housecoords.userid':ID},{$set:{'housecoords.$.waterSupplied':false}})
     res.json({
         status:"SUCCESS",
-        message:"Complaint submitted successfully"
+        message:"Complaint submitted successfully",
     })
     }
   })
 
+  
   app.listen(5000, () => {
       console.log("Server started on port 5000");
   })
