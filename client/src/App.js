@@ -5,12 +5,8 @@ import Register from './Register';
 import Map from './map';  
 import MapDept from './mapDept';
 import MapCust from './mapCust';
-// import RequestPasswordReset from './requestPasswordReset';
-// import ResetPassword from './resetPassword';
-import RequestPasswordReset from './pages/requestReset';
-import ResetPassword from './pages/resetPassword';
-import Test from './test2';
-import Profile from './profile'
+import RequestPasswordReset from './requestReset';
+import ResetPassword from './resetPassword';
 import NewReg from './register/register/test3'
 
 const App = () => {
@@ -19,7 +15,6 @@ const App = () => {
       <Router>
         <Routes>
 
-          <Route path="/test" element={<Test />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/map" element={<Map/>}/>
@@ -27,7 +22,6 @@ const App = () => {
           <Route path="/mapCustomer" element={<MapCust/>} />
           <Route path="/requestPasswordReset" element={<RequestPasswordReset/>} />
           <Route path="/resetPassword" element={<ResetPassword/>} />
-          <Route path="/profile" element={<Profile/>} />
           <Route path="newreg" element={<NewReg />} />
           {/* Add a default route for the root path */}
           <Route path="/" element={<Register />} />
