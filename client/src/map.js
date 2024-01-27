@@ -10,6 +10,7 @@ import GreenHouseMarker from './greenhousemarker.jpeg'
 import RedHouseMarker from './redhousemarker.jpeg'
 import junctionmarker from './junctionmarker.jpeg'
 import waterreservoir from './waterreservoir.jpeg'
+import treatmentplant from './watertreatmentplant.png'
 import bg from './bg.jpg'
 import user from './img/user.png';
 import edit from './img/edit.png';
@@ -27,7 +28,7 @@ import UserList from './UserList'
   
 function App()
 {
-    const origin = { lat: 16.82365305593255, lng: 78.36275955215761 };
+    const origin = { lat: 16.82335305593255, lng: 78.36555955215761 };
     const MapLibraries = ["places"]
     const {isLoaded} = useJsApiLoader({
         googleMapsApiKey:"AIzaSyB6IhzjbQp_KS4lsGdGWq3TvMgMdngijQU",
@@ -48,6 +49,7 @@ function App()
     const [ defaultjunctioncoords , setDefaultJunctionCoords ] = useState([])
     const [selectedHouseForJunction, setSelectedHouseForJunction] = useState(null);
     const [waterReservoirCoords, setWaterReservoirCoords] = useState([])
+    const [ treatmentplantCoords, setTreatmentplantCoords ] = useState([])
     const [selectedUserForAllotment, setSelectedUserForAllotment] = useState(null);
     const [newRegistrationsListModalOpen, setNewRegistrationsListModalOpen] = useState(false);
     const [isHouseMarkerAdded, setIsHouseMarkerAdded] = useState(false);
@@ -108,6 +110,12 @@ function App()
           cName: 'nav-text',
           img: require('./img/removejunction.png')
         },
+        // {
+        //     title: 'Water Treatment plant',
+        //     onclick:waterTreatmentPlant,
+        //     cName: 'nav-text',
+        //     img: require('./img/housemarker.png')
+        //   },
         // {
         //     title:'Reservoir',
         //     onclick:waterReservoir,
@@ -185,6 +193,9 @@ function App()
         else if(markerFunction==4){
             setWaterReservoirCoords((prevWaterReservoirCoords) => [...prevWaterReservoirCoords , pos])
         }
+        else if(markerFunction==5){
+            setTreatmentplantCoords((prevTreatmentplantCoords) => [...prevTreatmentplantCoords, pos])
+        }
     }
 
     function drawLine(){
@@ -211,6 +222,10 @@ function App()
         setMarkerFunction(4)
     }
     
+    function waterTreatmentPlant(){
+        setMarkerFunction(5)
+    }
+
     function deleteLastHouse(){
         if (housecoords.length > 0 && housecoords.length>defaultHouseCoords.length){
             const newHouseCoords = [...housecoords]
@@ -394,6 +409,7 @@ function App()
             setDefaultJunctionCoords(data.junctions)
             setJunctionCoords(data.junctions)
             setWaterReservoirCoords(data.waterReservoirCoords)
+            setTreatmentplantCoords(data.waterTreatmentplantCoords)
             // console.log(data.junctions)
             // data.housecoords.forEach(house => {
             //     console.log(house.waterSupplied);
@@ -486,6 +502,7 @@ function App()
                 housecoords,
                 junctioncoords,
                 waterReservoirCoords,
+                treatmentplantCoords,
             }),
         })
         const data = await response.json()
@@ -620,8 +637,8 @@ function App()
                 <nav ref={navRef}>
                   <a href="/#">about us</a>
                   <a href="/#">contact</a>
-                  <button onClick={viewComplaints}> VIEW COMPLAINTS</button>
-                  <button onClick={openNewRegistrationsList}> NEW REGISTRATIONS </button>
+                  <button className='complaintButton' onClick={viewComplaints}> VIEW COMPLAINTS</button>
+                  <button className='complaintButton' onClick={openNewRegistrationsList}> NEW REGISTRATIONS </button>
                 </nav>
               </header>
               {/* Profile */}
@@ -768,8 +785,16 @@ function App()
                 <Marker key={index + 1} position={waterReservoircoord} onClick={() => markerIndex(index,'reservoir')} 
                 icon={{
                     url:waterreservoir,
-                    scaledSize:new window.google.maps.Size(Math.max(20, 100 / Math.pow(2, 17 - zoomLevel)),Math.max(20, 100 / Math.pow(2, 17 - zoomLevel)))}} /> 
+                    scaledSize:new window.google.maps.Size(Math.max(20, 150 / Math.pow(2, 17 - zoomLevel)),Math.max(20, 150 / Math.pow(2, 17 - zoomLevel)))}} /> 
                 ))}
+
+            {treatmentplantCoords.map((plant,index) => (
+            <Marker key={index + 1} position={plant} 
+            // onClick={() => markerIndex(index,'reservoir')} 
+            icon={{
+                url:treatmentplant,
+                scaledSize:new window.google.maps.Size(Math.max(20, 150 / Math.pow(2, 17 - zoomLevel)),Math.max(20, 150 / Math.pow(2, 17 - zoomLevel)))}} /> 
+            ))}
 
             {/* {showMarkers && subcoords.map((coords,index) => (
                     <Marker key={index} position={coords} />

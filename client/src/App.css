@@ -184,7 +184,7 @@ html {
     font-size: 12px;
   }
   
-  input[type="submit"] {
+  /* input[type="submit"] {
     width: 100%;
     padding: 10px;
     font-size: 16px;
@@ -201,8 +201,8 @@ html {
     background: #fff;
     color: #68dceb;
   }
-  
-  button[type="submit"] {
+   */
+  /* button[type="submit"] {
     width: 100%;
     padding: 10px;
     font-size: 16px;
@@ -218,7 +218,7 @@ html {
   button[type="submit"]:hover {
     background: #fff;
     color: #68dceb;
-  }
+  } */
   
   :root{
     --bg: #242526;

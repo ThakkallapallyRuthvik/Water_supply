@@ -1,7 +1,7 @@
 import React, { Component,useState,useEffect } from 'react'
-import {Modal,ModalOverlay,ModalContent,ModalHeader,ModalBody,ModalCloseButton} from "@chakra-ui/react";
+import {Modal,ModalOverlay,ModalContent,ModalHeader,ModalBody,ModalCloseButton, VStack} from "@chakra-ui/react";
+import './request-reset.css';
 import bg4 from './bg.jpg'
-import './test2.css'
 function App(){
 
     const [ email, setEmail ] = useState('')
@@ -84,36 +84,31 @@ function App(){
 
     return(
         
-        <form onSubmit={nextpage}>
-            <div style={{backgroundImage : `url(${bg4})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-                height: '100vh',
-                width:'100vw',
-                display: 'grid',
-                placeContent: 'center'
-                }}>
+        <form onSubmit={nextpage} className='resetForm'>
 
-                <div className='resetContainer'>
-                        <h1 className='request-text' style={{ gridRow: '1', gridColumn: '1/5', placeSelf: 'center',
-                            fontSize: '2rem', textDecoration: 'underline', textDecorationThickness: '2px'
-                        }}>Password Reset</h1>
-                    <div style={{marginLeft: '1vw', marginTop: '5vh'}}>
-                        <input value={email} onChange={(e) => setEmail(e.target.value)} style={{gridColumn: '1/5', gridRow: '3', placeSelf: 'center'}} type='email' placeholder='Enter your email' />
-                        <i className='fas fa-envelope' style={{position: 'relative', top: '-5vh', left: '1vw',
-                            fontSize: '1.2rem'}}></i>
-                        <input value={resetString} onChange={(e) => setResetString(e.target.value)} style={{gridColumn: '1/5', gridRow: '4', placeSelf: 'center'}} type='text' placeholder='Enter your token' />
-                        <i className='fas fa-envelope' style={{position: 'relative', top: '-5vh', left: '1vw',
-                            fontSize: '1.2rem'}}></i>
-                        <input value={newPassword} onChange={(e) => setNewPassword(e.target.value)} style={{gridColumn: '1/5', gridRow: '5', placeSelf: 'center'}} type='password' placeholder='Enter your new password' />
-                        <i className='fas fa-envelope' style={{position: 'relative', top: '-5vh', left: '1vw',
-                            fontSize: '1.2rem'}}></i>
-                    </div>
-                    <button style={{
-                            backgroundImage: `url(${bg4})`, backgroundSize: 'cover', backgroundPosition: 'center',
-                            gridColumn: '1/5', gridRow: '7', placeSelf:'center' }} className='request-button' type='submit' >Finish</button>
-                </div>
+          <div>
+
+          <div className='resetContainer'>
+                  <h1 className='request-text' style={{ gridRow: '1', gridColumn: '1/5', placeSelf: 'center',
+                      fontSize: '2rem', textDecoration: 'underline', textDecorationThickness: '2px'
+                  }}>Password Reset</h1>
+              <div className='resetInputdiv' style={{display: 'flex', flexDirection: 'column', gridRow: '3/7', gridColumn: '1/5', alignItems: 'center', justifyContent: 'space-around'}}>
+                  <input  style={{}} type='email' placeholder='Enter your email' />
+                  <input  style={{}} type='email' placeholder='Enter your token' />
+                  <input  style={{}} type='email' placeholder='Enter your new password' />
+              </div>
+              
+              <div style={{display: 'flex',flexDirection: 'column', gridRow: '3/7', gridColumn: '1',alignItems: 'center', justifyContent: 'space-around', marginLeft: '50%',position:'relative',zIndex:2}}>
+                <i className='fas fa-envelope'></i>
+                <i className='fas fa-key'></i>
+                <i className='fas fa-lock'></i>
+              </div>
+              <button style={{
+                      // backgroundImage: url(${bg4}), backgroundSize: 'cover', backgroundPosition: 'center',
+                      gridColumn: '1/5', gridRow: '7', placeSelf:'center' }} className='request-button' type='submit' >Finish</button>
+          </div>
+
+          </div>
                 <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} blockScrollOnMount={false}>
                     <ModalOverlay />
                     <ModalContent bg="white" border={modalContent.border} borderRadius="5px" p={4} top={50} left="41%" boxSize="18%">
@@ -124,7 +119,7 @@ function App(){
                         </ModalBody>
                     </ModalContent>
                 </Modal>
-            </div>
+              
         </form>
     );
 }

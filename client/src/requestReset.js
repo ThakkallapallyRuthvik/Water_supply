@@ -1,7 +1,8 @@
 import React, { Component, useState } from 'react';
 import {Modal,ModalOverlay,ModalContent,ModalHeader,ModalBody,ModalCloseButton} from "@chakra-ui/react";
 import './test2.css'
-import bg4 from './bg.jpg'
+import './request-reset.css';
+// import bg4 from './bg.jpg'
 function App(){
 
     const [email, setEmail] = useState('');
@@ -61,36 +62,35 @@ function App(){
   }
 
     return(
-        <form onSubmit={nextpage}>
-            <div style={{backgroundImage : `url(${bg4})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-                height: '100vh',
-                width:'100vw',
-                display: 'grid',
-                placeContent: 'center'
-                }}>
+        <form onSubmit={nextpage} className='requestForm'>
+            <div>
                 
-                <div className='requestContainer'>
+                <div className='requestContainer' style={{ backgroundColor: 'transparent'}}>
 
-                    <h1 className='request-text' 
-                    style={{gridRow: '2', gridColumn: '2/5', placeSelf: 'center ',
-                    fontSize: '2rem', textDecoration: 'underline', textDecorationThickness: '2px'}}>Enter your Email</h1>
-                    <div className='request-input' style={{gridColumn: '3', gridRow: '4', placeSelf: 'center'}}>
-                        <input 
-                            value={email}
-                            onChange = {(e) => setEmail(e.target.value)}
-                            type='email' 
-                            placeholder='Email' />    
+                  <h1 className='request-text' 
+                  style={{gridRow: '2', gridColumn: '2/5', placeSelf: 'center ',
+                  fontSize: '2rem'}}>Enter your Email</h1>
+                  <div className='request-input' style={{gridColumn: '3', gridRow: '4', placeSelf: 'center'}}>
+                      <input 
+                          value={email}
+                          onChange = {(e) => setEmail(e.target.value)}
+                          type='email' 
+                          placeholder='Email' 
+                              style={{backgroundColor: 'transparent', color: 'white'}}
+                          />    
 
-                        <i className='fas fa-envelope' style={{position: 'relative', top: '-5vh', left: '1vw',
-                        fontSize: '1.2rem'}}></i>
-                    </div>
+                      <i className='fas fa-envelope' style={{position: 'relative', top: '-5.3vh', left: '1vw', zIndex: '2',
+                      fontSize: '1.2rem', color: 'white'}}></i>
+                  </div>
 
-                    <button style={{
-                            backgroundImage: `url(${bg4})`, backgroundSize: 'cover', backgroundPosition: 'center',
-                            gridColumn: '2', gridRow: '5', marginLeft: '0.5vw'}} className='request-button' type='submit' >Proceed</button>                    
+                  <button style={{
+                          // backgroundColor: 'transparent',
+                          gridColumn: '2/5', gridRow: '5', placeSelf: 'center'}} className='request-button' type='submit' >
+                              <p>Proceed</p>
+                              <i className="fas fa-arrow-right" style={{fontSize: '1.5rem', 
+                              // position: 'absolute', top: '83%', right: '18%'
+                              }} />
+                          </button>                    
                 </div>
                 <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} blockScrollOnMount={false}>
                     <ModalOverlay />

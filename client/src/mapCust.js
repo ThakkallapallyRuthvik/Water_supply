@@ -10,6 +10,7 @@ import GreenHouseMarker from './greenhousemarker.jpeg'
 import RedHouseMarker from './redhousemarker.jpeg'
 import junctionmarker from './junctionmarker.jpeg'
 import waterreservoir from './waterreservoir.jpeg'
+import treatmentplant from './watertreatmentplant.png'
 import bg from './bg.jpg'
 import user from './img/user.png';
 import edit from './img/edit.png';
@@ -27,7 +28,7 @@ import UserList from './UserList'
   
 function App()
 {
-    const origin = { lat: 16.82365305593255, lng: 78.36275955215761 };
+    const origin = { lat: 16.82335305593255, lng: 78.36555955215761 };
     const MapLibraries = ["places"]
     const {isLoaded} = useJsApiLoader({
         googleMapsApiKey:"AIzaSyB6IhzjbQp_KS4lsGdGWq3TvMgMdngijQU",
@@ -48,6 +49,7 @@ function App()
     const [ defaultjunctioncoords , setDefaultJunctionCoords ] = useState([])
     const [selectedHouseForJunction, setSelectedHouseForJunction] = useState(null);
     const [waterReservoirCoords, setWaterReservoirCoords] = useState([])
+    const [ treatmentplantCoords, setTreatmentplantCoords ] = useState([])
     const [selectedUserForAllotment, setSelectedUserForAllotment] = useState(null);
     const [newRegistrationsListModalOpen, setNewRegistrationsListModalOpen] = useState(false);
     const [isHouseMarkerAdded, setIsHouseMarkerAdded] = useState(false);
@@ -133,6 +135,9 @@ function App()
         else if(markerFunction==4){
             setWaterReservoirCoords((prevWaterReservoirCoords) => [...prevWaterReservoirCoords , pos])
         }
+        else if(markerFunction==5){
+            setTreatmentplantCoords((prevTreatmentplantCoords) => [...prevTreatmentplantCoords, pos])
+        }
     }
 
     function drawLine(){
@@ -157,6 +162,10 @@ function App()
 
     function waterReservoir(){
         setMarkerFunction(4)
+    }
+
+    function waterTreatmentPlant(){
+        setMarkerFunction(5)
     }
     
     function deleteLastHouse(){
@@ -342,6 +351,7 @@ function App()
             setDefaultJunctionCoords(data.junctions)
             setJunctionCoords(data.junctions)
             setWaterReservoirCoords(data.waterReservoirCoords)
+            setTreatmentplantCoords(data.waterTreatmentplantCoords)
             // console.log(data.junctions)
             // data.housecoords.forEach(house => {
             //     console.log(house.waterSupplied);
@@ -421,8 +431,8 @@ function App()
                 <nav ref={navRef}>
                   <a href="/#">about us</a>
                   <a href="/#">contact</a>
-                  <button onClick={requestWater}> REQUEST EXTRA WATER</button>
-                  <button onClick={()=>setComplaintsModal(true)}> RAISE A COMPLAINT</button>
+                  <button className='complaintButton' onClick={requestWater}> REQUEST EXTRA WATER</button>
+                  <button className='complaintButton' onClick={()=>setComplaintsModal(true)}> RAISE A COMPLAINT</button>
                 </nav>
               </header>
               {/* Profile */}
@@ -540,6 +550,14 @@ function App()
                 icon={{
                     url:waterreservoir,
                     scaledSize:new window.google.maps.Size(Math.max(20, 100 / Math.pow(2, 17 - zoomLevel)),Math.max(20, 100 / Math.pow(2, 17 - zoomLevel)))}} /> 
+                ))}
+
+            {treatmentplantCoords.map((plant,index) => (
+                <Marker key={index + 1} position={plant} 
+                // onClick={() => markerIndex(index,'reservoir')} 
+                icon={{
+                    url:treatmentplant,
+                    scaledSize:new window.google.maps.Size(Math.max(20, 150 / Math.pow(2, 17 - zoomLevel)),Math.max(20, 150 / Math.pow(2, 17 - zoomLevel)))}} /> 
                 ))}
 
 

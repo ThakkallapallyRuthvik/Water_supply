@@ -1,4 +1,3 @@
-
 .container{
     box-sizing: border-box; 
     min-width: 90vw;
@@ -21,35 +20,23 @@
     grid-template-rows: repeat(6, 10vh);
     width: 35vw;
     height: 60vh;
-    border-radius: 35px;
+    border-radius: 15px;
+    backdrop-filter: blur(4px);
+    /* border: 2px solid black; */
     position: relative;
     /* top: '-20vh'; */
-    background-color: #ffffff;
     border-radius: 35px;
-    box-shadow: 3px 3px 17px #888888, -3px -5px 17px #888888;
-    box-shadow: 3px 3px 17px #161616, -3px -5px 17px #161616;
-
-}
-
-.resetContainer{
-    box-sizing: border-box; 
-    display: grid;
-    grid-template-columns: repeat(4, 7.5vw);
-    grid-template-rows: repeat(8, 8.75vh);
-    width: 30vw;
-    height: 70vh;
-    border-radius: 35px;
-    position: relative;
-    /* top: '-20vh'; */
-    background-color: azure;
-    border-radius: 35px;
-    box-shadow: 3px 3px 17px #888888, -3px -5px 17px #888888;
-    box-shadow: 3px 3px 17px #161616, -3px -5px 17px #161616;
+    /* box-shadow: 3px 3px 17px #888888, -3px -5px 17px #888888;
+    box-shadow: 3px 3px 17px #161616, -3px -5px 17px #161616; */
+    box-shadow: 3px 3px 17px black, -3px -5px 17px black;
+    box-shadow: 3px 3px 17px black, -3px -5px 17px black;
 
 }
 
 
-.login-text, .register-text, .request-text{
+
+
+.login-text, .register-text{
     /* border: 1px solid #000; */
     font-family: 'Titillium Web', sans-serif;
     font-size: 3.5rem;
@@ -69,9 +56,20 @@
     
 }
 
-.username input, .username-register input, .requestContainer input, .resetContainer input{
+.username input, .username-register input, .requestContainer input{
 
     width: 25vw;
+    background-color: #ffffff;
+    text-indent: 2vw;
+    font-size: 1rem;
+    padding: 12px;
+    border: 2px solid #000;
+    border-radius: 1.5vh;
+    outline: none;
+}
+.resetContainer input{
+
+    width: 20vw;
     background-color: #ffffff;
     text-indent: 2vw;
     font-size: 1rem;
@@ -103,7 +101,7 @@
 }
 
 
-.login-button, .get-otp, .request-button{
+.login-button, .get-otp{
 
     /* margin-top: 100px;  */
     width: 20vw; 
@@ -138,10 +136,11 @@
 
 }
 
-.login-button:hover, .get-otp:hover, .request-button:hover{
+.login-button:hover, .get-otp:hover{
 
     transform: scale(1.1);
     border: 3px solid black;
+    /* cursor: url('./pointer-test.png'), auto; */
 
 }
 
@@ -162,11 +161,12 @@
     height: 10vh; 
     width: 5vw; 
     margin-top: 15%;
-    z-index: 2
+    z-index: 2;
+    /* cursor: url('./pointer-test.png'), auto; */
 
 }
 
-.role-button, .role-buttonclicked1, .role-buttonclicked21{
+.role-button, .role-buttonclicked, .role-buttonclicked2{
     position: relative;
     top: -9vh;
     left: -7.2vw;
@@ -199,7 +199,7 @@
 
 .otp-div input{
 
-    width: 9vw;
+    width: 10vw;
     text-indent: 2vw;
     font-size: 1rem;
     padding: 12px;
@@ -212,4 +212,3 @@
     border: 0.2px solid black;
     cursor: not-allowed;
 }
-

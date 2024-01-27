@@ -193,13 +193,14 @@ body{
  } */
 
  @import url('https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300;400;700&display=swap');
-*{
+
+/* *{
     padding:0;
     margin:0;
     box-sizing:border-box;
     font-family: 'Titillium Web', sans-serif;
 
-}
+} */
 :root{
     --mainColor:#dce0f0;
     --mainColorLight:#c1c5d4;   
@@ -215,19 +216,19 @@ body{
     background-color: var(--mainColor);
     color:var(--textColor);
 } */
-nav a,button{
+nav a,.complaintButton{
     margin:0 2rem;
     color:var(--textColor);
     text-decoration:none;
     font-size:18px;
 
 }
-nav a:hover,button:hover{
+nav a:hover,.complaintButton:hover{
     text-decoration:none;
     position:relative;
     color:var(--secondaryColor);
 }
-nav a:hover::after,button:hover::after{
+nav a:hover::after,.complaintButton:hover::after{
     content:"";
     width:15%;
     height:3px;
@@ -236,7 +237,8 @@ nav a:hover::after,button:hover::after{
     bottom:-4px;
     left:10px;
 }
-button {
+
+.complaintButton {
   background: transparent;
   border: none;
   outline: none;
@@ -245,7 +247,16 @@ button {
   font-size: 16px;
 }
 
-button:hover {
+.complaintButton {
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  color: var(--textColor);
+  font-size: 16px;
+}
+
+.complaintButton:hover {
   color: var(--secondaryColor);
 }
 header .nav-btn{
@@ -304,7 +315,7 @@ header .nav-btn{
 .navbutton{
   margin:0 2rem;
   color:var(--textColor);
-  text-decoration:none;
+  text-decoration:none; 
   font-size:18px;
 }
 

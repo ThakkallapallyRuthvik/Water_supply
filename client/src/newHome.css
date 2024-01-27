@@ -1,0 +1,450 @@
+
+.home {
+
+    background-image: url('./home_bg 2.png');
+    /* background-image: url('./home.png'); */
+    height: 100vh;
+    width: 100vw;
+    position: relative;
+    background-position: 0vw -25vh;
+    /* background-size: 100%; */
+    background-repeat: no-repeat;
+    background-size: cover;
+    display: grid;
+    grid-template-columns: repeat(10, 10vw);
+    grid-template-rows: repeat(10, 10vh);
+    /* box-shadow: 50px; */
+
+}
+
+.home > a{
+
+    backdrop-filter: blur(4px);
+}
+
+.flexparent{
+
+    display: flex;
+    flex-direction: row;
+    position: relative;
+    grid-row: 6/10;
+    grid-column: 3/9;
+    justify-content: space-around;
+    /* align-items: center ; */
+
+}
+
+.flexchild{
+
+    border: 2px solid black;
+    border-radius: 5%;
+    width: 20vw;
+    
+    display: flex;
+    /* flex-wrap: wrap; */
+    text-align: center;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    backdrop-filter: blur(6px);
+
+    transition: transform 1s ease-in-out;
+
+}
+
+.toggle{
+
+    width: 60%;
+    height: 17%;
+    border-radius: 15px;
+    background-color: rgb(74, 74, 201);
+    font-size: 1.2rem;
+    font-family: 'One Day';
+    text-indent: -50%;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    border: 5px solid midnightblue;
+    padding: 2px;
+    color: azure;
+    transition: transform 0.3s ease-in-out;   
+    margin: 0;
+    outline: none;
+}
+
+
+.toggle:hover{
+
+    transform: scale(1.2);
+    background-color: midnightblue;
+
+}
+
+.toggle:active{
+
+    border: 3px solid black;
+    color: black;
+    background-color: white;
+}
+
+.flexparent > .flexchild.active:nth-child(1){
+
+    transform: translateX(-270%);
+    visibility: 0;
+
+}
+
+.flexparent > .flexchild.active:nth-child(2){
+
+    transform: translateX(270%);
+
+}
+
+.flexparent > .flexchild.active1:nth-child(1){
+
+    transform: translateX(-400%);
+    /* transform: translateY(150%); */
+
+
+}
+
+.flexparent > .flexchild.active1:nth-child(2){
+
+    transform: translateX(-400%) ;
+    /* transform: translateY(150%) ; */
+
+
+}
+
+.login{
+
+    grid-column: 4/8;
+    grid-row: 11;
+    /* border: 3px solid black; */
+    width: 25vw;
+    height: 50vh;
+    place-self: center;
+    border-radius: 3%;
+
+    transition: all 1s ease-in-out;
+
+
+    display: grid;
+    grid-template-columns: repeat(5, 5vw);
+    grid-template-rows: repeat(5, 10vh);
+
+    color: black;
+    position: relative;
+
+    backdrop-filter: blur(4px);
+
+    box-shadow: 3px 3px 17px black, -3px -5px 17px black;
+    box-shadow: 3px 3px 17px black, -3px -5px 17px black;
+}
+
+.login input::placeholder{
+
+    color: black;
+}
+
+.login.active{
+
+    transform: translateY(-160%);
+    grid-column: 4/8;
+    /* border: 3px solid black; */
+    width: 25vw;
+    height: 50vh;
+
+    place-self: center;
+    border-radius: 3%;
+}
+
+
+
+.login > button:nth-child(1){
+
+    border: 0px solid black;
+    border-radius: 10% 10% 100% 10%;
+    position: relative;
+    font-size: 1.3rem;
+    grid-column: 1;
+    grid-row: 1;
+    width: 4vw;
+    height: 8vh ;
+    background-color: rgb(255, 255, 255, 0);
+
+}
+
+.loginInput{
+
+    display: flex;
+    flex-direction: column;
+    /* border: 1px solid black; */
+    grid-row: 2/6;
+    grid-column: 1/6;
+    justify-content: space-around;
+    align-items: center;
+
+}
+
+.loginInput >input:nth-child(2)::placeholder{
+
+    color: white;
+}
+/* 
+.loginIcons{
+
+    display: flex;
+    flex-direction: column;
+    grid-row: 2/5;
+    grid-column: 4/5;
+    gap: 50%;
+    justify-content: center;
+
+} */
+
+.loginInput > input:nth-child(1), .loginInput > input:nth-child(2){
+
+    width: 54%;
+    height: 15%;
+    outline: none;
+    border: 1px solid black ;
+    border-radius: 15px;
+    /* text-indent: 15%; */
+    font-size: .96rem;
+    padding: 0 6% 0 10%;
+    background-color: transparent;    
+}
+
+
+.login > div > input:nth-child(3){
+
+    width: 70%;
+    height: 15%;
+    border-radius: 15px;
+    font-size: 1.2rem;
+    border: 3px solid black;
+    font-weight: 900;
+}
+
+
+.register{
+
+    grid-row: 3/10;
+    /* grid-column: 2/10; */
+
+    grid-column: 11;
+    place-self: center;
+    border-radius: 10px;
+    /* width: 20vw;
+    height: 20vh; */
+    min-width: 80vw;
+    min-height: 80vh;
+    /* min-width: 80vw;
+    min-height: 85vh; */
+    border: 3px solid black;
+
+    transition: transform 1s ease-in-out;
+
+    position: relative;
+
+    display: grid;
+    /* grid-template-columns: repeat(9, 10vw);
+    grid-template-rows: repeat(10, 8.5vh); */
+    grid-template-columns: repeat(8, 10vw);
+    grid-template-rows: repeat(10, 8vh);
+
+    background-color: rgb(255, 255, 255, 0);
+
+    backdrop-filter: blur(5px);
+
+}
+
+.register.active{
+
+    /* grid-column: 2/10; */
+    grid-row: 3/10;
+    place-self: center;
+
+    border: 3px solid black;
+    transform: translateX(-112.5%) translateY(-5%);
+    /* min-width: 80vw;
+    min-height: 85vh; */
+    min-width: 80vw;
+    min-height: 80vh;
+
+
+}
+
+.register > button:nth-child(1){
+
+    /* border: 1px solid black; */
+    border: none;
+    border-radius: 10% 10% 100% 10%;
+    position: relative;
+    font-size: 2rem;
+    grid-column: 1;
+    grid-row: 1;
+    width: 6vw;
+    height: 12vh ;
+    background-color: rgb(255, 255, 255, 0);
+
+}
+
+.registerInput{
+
+    display: flex;
+    flex-direction: column;
+    /* border: 1px solid black; */
+    grid-row: 3/10;
+    grid-column: 1/4;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.registerInput input{
+
+    width: 60%;
+    height: 11%;
+    border: 1px solid black;
+    background-color: transparent;
+    border-radius: 15px;
+    padding: 0 6% 0 9%;
+    font-size: 0.96rem;
+
+}
+
+.registerInput input{
+
+    color: white;
+}
+
+.registerInput input::placeholder{
+
+    color: white;
+}
+
+.register div i{
+
+    position: relative;
+    z-index: 1;
+
+}
+
+.otpInput{
+
+    display: flex;
+    flex-direction: column;
+    /* border: 1px solid black; */
+    grid-row: 5/9;
+    grid-column: 6/10;
+    justify-content: space-around;
+    align-items: center;
+
+}
+
+.roleInput{
+
+    display: flex;
+    grid-row: 3/5;
+    grid-column: 6/10;
+    justify-content: space-evenly;
+    align-items: center;
+
+    font-size: 2em;
+    font-weight: 500;
+    
+}
+
+.dept, .cust{
+
+    border-radius: 50%;
+    width: 14%;
+    height: 50%;
+    outline: none;
+    padding: none;
+    border: 5px solid midnightblue;
+    position: relative;
+
+}
+
+.roleInput i{
+
+    font-size: 2.5em;
+
+}
+
+.deptyes, .custyes{
+
+    border-radius: 50%;
+    width: 14%;
+    height: 50%;
+    border: 5px solid green;
+    position: relative;
+}
+
+.cust::before, .custyes::before{
+
+    content: attr(cust-tooltip);
+}
+
+.dept::before, .deptyes::before{
+
+    content: attr(dept-tooltip);
+}
+
+.cust::after, .cust::before,
+.custyes::after, .custyes::before,
+.dept::before, .dept::after, 
+.deptyes::before, .deptyes::after{
+    --tooltip-color: midnightblue;
+    --size: 0;
+    --afterSize: 20px;
+
+    position: absolute;
+    top: -.25rem;
+    left: 50%; 
+    transform: translateX(-48%) translateY(var(--translate-y, 0)) scale(var(--size));
+    transition: 150ms transform;
+
+}
+
+.dept::before, .deptyes::before, .cust::before, .custyes::before{
+
+    --translate-y: calc(-100% - var(--afterSize));
+
+    font-size: 1.2rem;
+    /* width: 100px;
+    height: 50px; */
+    padding: .7rem;
+    /* width: max-content; */
+    background-color: var(--tooltip-color);
+    color: white;
+    border-radius: .3rem;
+    text-align: center;
+    transform-origin: bottom center;
+
+}
+
+.dept::after, .deptyes::after, .cust::after, .custyes::after{
+
+    --translate-y: calc((-1 * var(--afterSize)) - (var(--afterSize) * 0.3));
+
+    content: '';
+    border: var(--afterSize) solid transparent;
+    /* border: 20px solid transparent; */
+
+    border-top-color: var(--tooltip-color);
+    /* border-top-color: yellow; */
+
+    transform-origin: center top;
+}
+
+.dept:hover::before, .dept:hover::after, .deptyes:hover::before, .deptyes:hover::after,
+.cust:hover::after, .custyes:hover::after, .cust:hover::before, .custyes:hover::before{
+
+    --size: 1;
+}
+
+

@@ -1,0 +1,104 @@
+.requestForm > div:nth-child(1){
+
+    background-image: url('./home_bg 2.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    height: 100vh;
+    width: 100vw;
+    display: grid;
+    place-content: center;
+
+}
+
+.resetForm > div:nth-child(1){
+
+    background-image: url('./home_bg 2.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    height: 100vh;
+    width: 100vw;
+    display: grid;
+    place-content: center;
+
+}
+
+
+.request-text{
+
+    /* font-family: 'Titillium Web', sans-serif; */
+    font-size: 3.5rem;
+    font-weight: 550;
+    color: black;
+}
+
+.request-button{
+
+    width: 15vw; 
+    height: 7vh; 
+    border-radius: 15px;
+    background-color: rgb(74, 74, 201);
+    font-size: 1.2rem;
+    font-family: 'One Day';
+    /* text-indent: -50%; */
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    border: 5px solid midnightblue;
+    padding: 2px;
+    color: azure;
+    transition: transform 0.3s ease-in-out;   
+    margin: 0;
+    outline: none;
+}
+
+.request-button:hover{
+
+    transform: scale(1.2);
+    background-color: midnightblue;
+
+}
+
+.request-button:active{
+
+    border: 3px solid black;
+    color: black;
+    background-color: white;
+}
+
+.request-input > input::placeholder{
+
+    color: white;
+    
+
+}
+
+.resetContainer{
+    box-sizing: border-box; 
+    display: grid;
+    grid-template-columns: repeat(4, 7.5vw);
+    grid-template-rows: repeat(8, 8.75vh);
+    width: 30vw;
+    height: 70vh;
+    border-radius: 35px;
+    position: relative;
+    /* top: '-20vh'; */
+    background-color: transparent;
+    backdrop-filter: blur(5px);
+    border-radius: 35px;
+    box-shadow: 3px 3px 17px black, -3px -5px 17px black;
+    box-shadow: 3px 3px 17px black, -3px -5px 17px black;
+
+}
+
+.resetInputdiv input{
+
+    background-color: rgb(255, 255, 255, 0.2);
+}
+
+.resetInputdiv > input::placeholder{
+
+    color: black;
+
+}
