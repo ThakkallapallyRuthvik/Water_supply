@@ -9,17 +9,53 @@ const UserVerification = require('./models/UserVerification');
 const PasswordReset = require('./models/PasswordReset')
 const Otpverification = require('./models/OTPVerificationSchema')
 const Complaints = require('./models/complaints')
+const Reports = require('./models/Reports')
 const nodemailer = require('nodemailer');
 const { v4: uuidv4 } = require("uuid");
 require("dotenv").config();
 const path = require("path");
 const { error } = require('console');
+const cron = require('node-cron');
+const moment = require('moment');
 
 app.use(cors())
 app.use(express.json())
 
 mongoose.connect('mongodb://127.0.0.1:27017/Water_supply')
 
+//automate water supply timing at 3:00 PM
+cron.schedule('00 15 * * *', async () => {
+    console.log('Running scheduled task...');
+    try {
+        // Fetch all users from the database
+        const users = await User.find({ role: 'Customer', houseAlloted: { $exists: true, $ne: null }});
+        const Hquantity = await Coordinates.updateMany({'housecoords': { $elemMatch: { 'Hquantity': { $exists: true } } }},{$set:{'housecoords.$[element].Hquantity':5}},
+        { arrayFilters: [{ 'element.Hquantity': { $exists: true } }] })
+        console.log(Hquantity)
+        // console.log(thfrffe ${users});
+        // console.log(${users.length} for creating reports.)
+        // Create a new report for each user
+        const reportsArray = [];
+        for (const user of users) {
+            const newReport = {
+                CANID: user.houseAlloted,
+                USERID: user.ID,
+                suppliedAt: moment().format('MM/DD/YYYY'),  
+                expiresAt: moment().add(1, 'day').format('MM/DD/YYYY'),
+                waterquantitysupplied:5,
+            };
+            reportsArray.push(newReport);
+        }
+        // console.log(reportsArray)
+        await Reports.create({
+            suppliedat: moment().format('MM/DD/YYYY'),
+            reports:reportsArray,
+        })
+        console.log('New reports added successfully.');
+    } catch (error) {
+        console.error('Error adding new reports:', error);
+    }
+});
 
 // nodemailer transporter
 let transporter = nodemailer.createTransport({
@@ -44,8 +80,8 @@ let ID;
 //signup
 app.post("/api/register", async (req, res) => {
   ID = uuidv4().slice(0,7);
-  let { name, email, password, cp ,  role, add } = req.body;
-  if (name === "" || password === "" || email === "" || add === "" ) {
+  let { name, email, password, confirmpassword ,  role, add } = req.body;
+  if (name === "" || password === "" || confirmpassword ==="" || email === "" || add === "" ) {
       return res.json({
           status: "FAILED",
           message: "Empty credentials supplied!"
@@ -80,6 +116,11 @@ app.post("/api/register", async (req, res) => {
                 status: "FAILED",
                 message: "User with the provided email already exists"
             });
+        }else if(password!=confirmpassword){
+            return res.json({
+                status:"FAILED",
+                message:"Passwords do not match"
+            })
         } else {
             // Try to create a new user
 
@@ -704,6 +745,7 @@ app.post("/api/map",async(req,res) =>{
         housecoords:req.body.housecoords,
         junctions:req.body.junctioncoords,
         waterReservoirCoords:req.body.waterReservoirCoords,
+        waterTreatmentplantCoords:req.body.treatmentplantCoords
     })
 
     if(coord){
@@ -717,7 +759,7 @@ app.post("/api/map",async(req,res) =>{
 app.post("/api/default",async(req,res) =>{
     const coord = await Coordinates.findOne();
     if(coord){
-        return res.json({coordinates:coord.coordinates,housecoords:coord.housecoords,junctions:coord.junctions,waterReservoirCoords:coord.waterReservoirCoords})
+        return res.json({coordinates:coord.coordinates,housecoords:coord.housecoords,junctions:coord.junctions,waterReservoirCoords:coord.waterReservoirCoords,waterTreatmentplantCoords:coord.waterTreatmentplantCoords})
     }
     else{
         return res.json({status:'error coords not imported'})
@@ -821,8 +863,24 @@ app.post("/api/mapDept/viewComplaints",async(req,res) => {
 
   app.post("/api/mapDept/resolveComplaints",async(req,res) => {
     const {id} = req.body;
-    // const complaint = 
-    await Complaints.updateOne({ID:id,status:"Active"},{$set:{status:"Resolved",dateresolved:Date.now()}})
+    // console.log(description.slice(0,16),'abc')
+    // console.log(description.slice(17,18),'abc')
+    const complaint = await Complaints.findOne({ID:id})
+    const description = complaint.description
+    // if(description.slice(0,16)=="Need extra water"){
+    //     await Coordinates.updateOne({'housecoords.userid':ID},{$set:{'housecoords.$.Hquantity':{$sum: [
+    //         '$housecoords.$.Hquantity',
+    //         parseInt(description.slice(17, 18))]}}})
+    //     await Reports.updateOne
+    // }
+    const inputDateString = Date.now();
+    const inputDate = new Date(inputDateString);
+    const formattedDateString = inputDate.toLocaleDateString('en-US', {
+    month: '2-digit',
+    day: '2-digit',
+    year: 'numeric'
+    });
+    await Complaints.updateOne({ID:id,status:"Active"},{$set:{status:"Resolved",dateresolved:formattedDateString}})
     await Coordinates.updateOne({'housecoords.userid':id},{$set:{'housecoords.$.waterSupplied':true}})
     return res.json({status:'SUCCESS',message:'Complaint resolved!'})
   })
@@ -835,6 +893,13 @@ app.post("/api/mapDept/viewComplaints",async(req,res) => {
     // console.log(ID)
     const {description} = req.body;
     const existingComplaint = await Complaints.find({ID:ID,status:"Active"})
+    const inputDateString = Date.now();
+    const inputDate = new Date(inputDateString);
+    const formattedDateString = inputDate.toLocaleDateString('en-US', {
+    month: '2-digit',
+    day: '2-digit',
+    year: 'numeric'
+    });
     if (description==""){
         res.json({
             status:"FAILED",
@@ -851,7 +916,7 @@ app.post("/api/mapDept/viewComplaints",async(req,res) => {
         // HouseID:req.body.HouseID,
         description:req.body.description,
         status:"Active",
-        datecomplained:Date.now(),
+        datecomplained:formattedDateString,
         // dateresolved:Date.now(),
     })
     await Coordinates.updateOne({'housecoords.userid':ID},{$set:{'housecoords.$.waterSupplied':false}})
@@ -862,6 +927,29 @@ app.post("/api/mapDept/viewComplaints",async(req,res) => {
     }
   })
 
+  app.post("/api/getreports",async(req,res)=>{
+    const calendar = req.body.calendar
+    try {
+        const allreports = await Reports.find({"reports.suppliedAt":calendar});
+        // console.log(allreports)
+        res.json(allreports)
+    } catch(error){
+        console.error("Error fetching reports",error)
+        res.status(500).json({ error: 'Internal Server Error' })
+    }
+})
+
+app.post('/api/sendreports', async (req, res) => {
+    const rep = await Reports.create({
+        reports:req.body.reportsarray,
+    })
+    if(rep){
+        return res.json({status:'reports saved'})
+    }
+    else{
+        return res.json({status:'reports not saved'})
+    }
+  });
   
   app.listen(5000, () => {
       console.log("Server started on port 5000");
