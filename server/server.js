@@ -24,14 +24,14 @@ app.use(express.json())
 mongoose.connect('mongodb://127.0.0.1:27017/Water_supply')
 
 //automate water supply timing at 3:00 PM
-cron.schedule('00 15 * * *', async () => {
+cron.schedule('00 18 * * *', async () => {
     console.log('Running scheduled task...');
     try {
         // Fetch all users from the database
         const users = await User.find({ role: 'Customer', houseAlloted: { $exists: true, $ne: null }});
         const Hquantity = await Coordinates.updateMany({'housecoords': { $elemMatch: { 'Hquantity': { $exists: true } } }},{$set:{'housecoords.$[element].Hquantity':5}},
         { arrayFilters: [{ 'element.Hquantity': { $exists: true } }] })
-        console.log(Hquantity)
+        // console.log(Hquantity)
         // console.log(thfrffe ${users});
         // console.log(${users.length} for creating reports.)
         // Create a new report for each user
@@ -80,7 +80,7 @@ let ID;
 //signup
 app.post("/api/register", async (req, res) => {
   ID = uuidv4().slice(0,7);
-  let { name, email, password, confirmpassword ,  role, add } = req.body;
+  let { name, email, password, confirmpassword , role, add } = req.body;
   if (name === "" || password === "" || confirmpassword ==="" || email === "" || add === "" ) {
       return res.json({
           status: "FAILED",
@@ -671,6 +671,15 @@ PasswordReset
                             //update complete 
                             //deling the password reset record
                             PasswordReset.deleteOne({email})
+                            const mailOptions = {
+                                from: process.env.AUTH_EMAIL,
+                                to: email,
+                                subject: "Password Reset Successful",
+                                html: `<p>Your password has been reset successfully!</p>
+                                <p>You can proceed to login</p>`,
+                            };
+                            transporter
+                            .sendMail(mailOptions)
                             .then(() => {
                                 //both the records updated 
                                 res.json({
@@ -865,14 +874,20 @@ app.post("/api/mapDept/viewComplaints",async(req,res) => {
     const {id} = req.body;
     // console.log(description.slice(0,16),'abc')
     // console.log(description.slice(17,18),'abc')
-    const complaint = await Complaints.findOne({ID:id})
+    const complaint = await Complaints.findOne({ID:id,status:'Active'})
     const description = complaint.description
-    // if(description.slice(0,16)=="Need extra water"){
-    //     await Coordinates.updateOne({'housecoords.userid':ID},{$set:{'housecoords.$.Hquantity':{$sum: [
-    //         '$housecoords.$.Hquantity',
-    //         parseInt(description.slice(17, 18))]}}})
-    //     await Reports.updateOne
-    // }
+    if(description.slice(0,16)=="Need extra water"){
+        console.log(description.slice(17, 18))
+        const incrementValue = parseInt(description.slice(17, 18))
+        console.log(id)
+        const Report = await Reports.findOne({'reports.USERID':id})
+        console.log(Report,Report.waterquantitysupplied)
+        const newHQuantity = Report.waterquantitysupplied + parseInt(description.slice(17, 18))
+        console.log(newHQuantity)
+        await Coordinates.updateOne({'housecoords.userid':id},
+            {$set: {'$housecoords.$.Hquantity':10}})
+        await Reports.updateOne({'reports.USERID':id},{$inc:{'$reports.$.waterquantitysupplied':incrementValue}})
+    }
     const inputDateString = Date.now();
     const inputDate = new Date(inputDateString);
     const formattedDateString = inputDate.toLocaleDateString('en-US', {
