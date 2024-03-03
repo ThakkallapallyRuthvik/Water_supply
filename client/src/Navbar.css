@@ -223,12 +223,14 @@ nav a,.complaintButton{
     font-size:18px;
 
 }
-nav a:hover,.complaintButton:hover{
+.main-nav a:hover,  
+.complaintButton:hover{
     text-decoration:none;
     position:relative;
     color:var(--secondaryColor);
 }
-nav a:hover::after,.complaintButton:hover::after{
+.main-nav a:hover::after,
+.complaintButton:hover::after{
     content:"";
     width:15%;
     height:3px;
@@ -348,39 +350,40 @@ header .nav-btn{
 
 .menu-bars {
   position: relative;
-  font-size: 2rem;
-  margin-top: 6px;
-  background: none;
-  order: 2;
   z-index: 0;
+  font-size: 2rem;
+
 }
 
 .nav-menu {
-  background-color:rgb(40, 38, 40);
-  width: 80px;
-  height: 100vh;
+  /* background-color:rgb(40, 38, 40); */
+  width: 70px;
+  height: 100%;
   display: flex;
   justify-content: center;
   /* align-items: center; */
-  position: fixed;
-  top: 30;
-  right: -50%;
+  position: absolute;
+  z-index: 0;
+  top: -2%;
+  right: -6%;
   transition: 850ms;
+  background-color: transparent;
 }
 
 .nav-menu.active {
   right: 0%;
   transition: 350ms;
   z-index: 10;
+  background-color:rgb(40, 38, 40);
 }
 
 .nav-text {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 8px 0px 8px 16px;
+  padding: 8px 8px 8px 8px;
   list-style: none;
-  height: 60px;
+  height: 40px;
   position: relative;
   z-index: 10;
 }

@@ -1,0 +1,165 @@
+:root{
+    --textColor : white;
+
+}
+
+.report-page{
+
+    display: grid;
+    grid-template-columns: repeat(10, 10vw);
+    grid-template-rows: repeat(10, 10vh);
+
+}
+
+.report-title{
+
+    grid-row: 1;
+    grid-column: 2/4;
+    justify-self: center;
+    
+}
+
+.leftbar{
+
+    grid-row: 1/11;
+    grid-column: 1;
+    background-image: url('./home_bg2.png');
+    background-position: 0%;
+    /* transform: translateX(-15%); */
+    /* transition: translate 0.5s ease-in-out; */
+}
+
+.calendarWrap{
+
+    grid-row: 3;
+    grid-column: 3;
+    
+}
+
+.calendarWrap input{
+
+    width: 100%;
+    height: 50%;
+    border-radius: 12px;
+    border: 2px solid midnightblue;
+    margin: 0;
+    outline: none;
+    padding: 0;
+    text-align: center;
+
+}
+
+.calendarBox{
+
+    position: relative;
+    top: -220%;
+    right: -120%;
+    
+}
+
+.calendarELement{
+
+    background: black;
+}
+
+
+.fetchReports{
+    grid-row: 4;
+    grid-column: 3;
+
+    width: 100%;
+    height: 60%;
+    border-radius: 10px;
+    background-color: rgb(74, 74, 201);
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    border: 5px solid midnightblue;
+    padding: 0;
+    color: azure;
+    transition: transform 0.3s ease-in-out;   
+    margin: 0;
+    outline: none;
+}
+
+.fetchReports:hover{
+
+    transform: scale(1.2);
+    background-color: midnightblue;
+}
+
+.fetchReports:active{
+
+    border: 3px solid black;
+    color: black;
+    background-color: white;
+}
+
+
+.reports-main{
+    
+
+    overflow: scroll;
+    grid-row: 6/10;
+    width: max-content;
+    height: 120%;
+    grid-column: 2/7;
+    justify-self: center;
+
+    border-radius: 10px;
+    padding: 0%;
+    /* margin-top: 15%; */
+
+      
+}
+
+.reports-main::-webkit-scrollbar{
+    width: 0;
+}
+.reports-table{
+
+    border-collapse: collapse;
+    
+}
+
+.table-data, th, .table-caption{
+
+    padding: 1rem;
+    color: var();
+}
+
+
+.table-caption{
+
+    position: sticky;
+    top: 0;
+    background: hsl(240 86% 11%);
+    color: var(--textColor);
+    /* text-transform: none; */
+    font-size: 1.2rem;
+    font-weight: 700;
+    
+}
+
+th{
+
+    background: rgb(26, 26, 101);
+    color: var(--textColor);
+}
+
+.table-header{
+
+    position: sticky;
+    top: 19%;
+}
+.table-data{
+
+    text-align: center;
+    color: black;
+}
+
+.table-row:nth-of-type(2n+1){
+
+    background: hsl(240 73% 12%/ 0.17);
+}

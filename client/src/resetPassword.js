@@ -93,9 +93,12 @@ function App(){
                       fontSize: '2rem', textDecoration: 'underline', textDecorationThickness: '2px'
                   }}>Password Reset</h1>
               <div className='resetInputdiv' style={{display: 'flex', flexDirection: 'column', gridRow: '3/7', gridColumn: '1/5', alignItems: 'center', justifyContent: 'space-around'}}>
-                  <input  style={{}} type='email' placeholder='Enter your email' />
-                  <input  style={{}} type='email' placeholder='Enter your token' />
-                  <input  style={{}} type='email' placeholder='Enter your new password' />
+                  <input  style={{}} type='email' placeholder='Enter your email' 
+                  value={email} onChange={(e) => setEmail(e.target.value)} />
+                  <input  style={{}} type='text' placeholder='Enter your token' 
+                  value={resetString} onChange={(e) => setResetString(e.target.value)} />
+                  <input  style={{}} type='password' placeholder='Enter your new password' 
+                  value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
               </div>
               
               <div style={{display: 'flex',flexDirection: 'column', gridRow: '3/7', gridColumn: '1',alignItems: 'center', justifyContent: 'space-around', marginLeft: '50%',position:'relative',zIndex:2}}>

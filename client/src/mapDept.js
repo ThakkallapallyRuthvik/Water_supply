@@ -11,7 +11,7 @@ import RedHouseMarker from './redhousemarker.jpeg'
 import junctionmarker from './junctionmarker.jpeg'
 import waterreservoir from './waterreservoir.jpeg'
 import treatmentplant from './watertreatmentplant.png'
-import bg from './bg.jpg'
+import bg from './home_bg2.png'
 import user from './img/user.png';
 import edit from './img/edit.png';
 import inbox from './img/envelope.png';
@@ -22,12 +22,16 @@ import logo from './img/logo-1.png'
 import './profile.css';
 import './App.css'
 import './Navbar.css'
+import './functions.css'
 import UserList from './UserList'
 
 
   
 function App()
 {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
     const origin = { lat: 16.82335305593255, lng: 78.36555955215761 };
     const MapLibraries = ["places"]
     const {isLoaded} = useJsApiLoader({
@@ -70,6 +74,8 @@ function App()
     const [sidebar, setSidebar] = useState(false);
     const showSidebar = () => setSidebar(!sidebar);
     const [open, setOpen] = useState(false);
+    const [reportsarray,setreportsarray] = useState([])
+    const [iswatersupplied , setiswatersupplied] = useState(0)
     let menuRef = useRef();
     const navRef = useRef();
     let SidebarData = [
@@ -77,38 +83,60 @@ function App()
           title: 'Draw Line',
           onclick:drawLine,
           cName: 'nav-text',
-          img: require('./img/newline.png')
+          img: require('./img/newline.png'),
+          content: 'Draw Line',
+          contentClassName : 'line',
         },
         {
           title: 'House Marker',
           onclick:houseMarker,
           cName: 'nav-text',
-          img: require('./img/housemarker.png')
+          img: require('./img/housemarker.png'),
+          content: 'House Marker',
+          contentClassName : 'house',
+
         },
         {
           title: 'Junction',
           onclick:junctionMarker,
           cName: 'nav-text',
-          img: require('./img/junctionmarker.png')
+          img: require('./img/junctionmarker.png'),
+          content: 'Junction Marker',
+          contentClassName : 'junction',
         
         },
         {
           title: 'Delete Last Line',
           onclick:deleteLastLine,
           cName: 'nav-text',
-          img: require('./img/removeline.png')
+          img: require('./img/removeline.png'),
+          content: 'Delete Last Line',
+          contentClassName : 'delLine',
         },
+        // {
+        //     title:'Reservoir',
+        //     onclick:waterReservoir,
+        //     cName:'nav-text',
+        //     img: require('./img/removeline.png'),
+        //     content: 'Delete Last Line',
+        //     contentClassName : 'delLine',
+        // },
         {
           title: 'Delete Last House',
           onclick:deleteLastHouse,
           cName: 'nav-text',
-          img: require('./img/removehousemarker.png')
+          img: require('./img/removehousemarker.png'),
+          content: 'Delete Last House',
+          contentClassName : 'delHouse',
         },
         {
           title: 'Delete Last Junction',
           onclick:deleteLastJunction,
           cName: 'nav-text',
-          img: require('./img/removejunction.png')
+          img: require('./img/removejunction.png'),
+          content: 'Delete Last Junction',
+          contentClassName : 'delJunction',
+
         },
         // {
         //     title:'Reservoir',
@@ -123,9 +151,12 @@ function App()
             await submitUserData();
           },
           cName:'nav-text',
-          img: require('./img/submitcoords.png')
+          img: require('./img/submitcoords.png'),
+          content: 'Submit',
+          contentClassName : 'submit',
         }
       ];
+
 
     useEffect(() => {
     let handler = (e)=>{
@@ -360,9 +391,91 @@ function App()
         return Math.max(80 - zoomLevel * 3, 10);
     };
 
-    function handleSupplyWater(){
+    const sendreports = async () => {
+        try {
+            const response = await fetch('http://localhost:5000/api/sendreports', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    reportsarray,
+                }),
+            });
 
+            const data = await response.json();
+            console.log(data);
+
+            if (data) {
+                openModal('✅ Submitted reports successfully');
+            }
+        } catch (error) {
+            openModal('❌ Error submitting reports');
+            console.error('Error: ', error);
+        }
+        setreportsarray([]);
+    };
+
+    useEffect(() => {
+        // Check if there are new reports to send
+        if (reportsarray.length > 0) {
+            sendreports();
+        }
+    }, [reportsarray]); // Run this effect whenever reportsarray changes
+
+    useEffect(() => {
+        setiswatersupplied((prevIsWaterSupplied) => {
+            const allHousesHaveHQuantityFive = housecoords.every((house) => house.Hquantity === 5);
+            return allHousesHaveHQuantityFive ? 1 : 0;
+          });
+    },[housecoords])
+
+    async function SupplyWaterQuantity() {
+        const maxq = 5;
+        // let temp = 0;
+        
+        if (iswatersupplied == 1) {
+            openModal('Water supplied for today');
+            // temp == 5;
+        } else if (waterQuantity > maxq * housecoords.length && iswatersupplied == 0) {
+            // Set Hquantity to 5 for all houses
+            const updatedHouseCoords = housecoords.map((house) => ({
+                ...house,
+                Hquantity: 5,
+            }));
+            await setHouseCoords(updatedHouseCoords);
+            // await submitCoordinates();
+            setiswatersupplied(1);
+            // Create new reports for all eligible users
+            const newReports = UserDataForDept.map((user) => ({
+                CANID: user.houseAlloted,
+                suppliedat: today.toDateString(),
+                expiresat: tomorrow.toDateString(),
+                email: user.email,
+                waterquantitysupplied: maxq,
+            }));
+            
+            // Update the state with new reports
+            setreportsarray((prevReports) => [...prevReports, ...newReports]);
+    
+            // Send reports to the server
+            // await sendreports();
+        } else {
+            openModal(`Not enough water to supply ${housecoords.length} houses`);
+        }
+        // setiswatersupplied(0);
     }
+
+    const supplyWaterAutomatically = async () => {
+        const updatedHouseCoords = housecoords.map((house) => ({
+            ...house,
+            Hquantity: 0,
+          }));
+        await setHouseCoords(updatedHouseCoords);
+        SupplyWaterQuantity();
+    
+        console.log('Water supplied automatically.');
+      };
     
     const openModal = (body) => {
         SetModalContent({
@@ -381,6 +494,7 @@ function App()
             body: body
         });
         setNewRegModal(true);
+        // console.log(body)
     };
 
     useEffect(() => {
@@ -664,8 +778,7 @@ function App()
         <img src={logo} style={{width:70,height:70,position:'absolute',left:'10px'}}/>
           <header>
                 <nav ref={navRef}>
-                  <a href="/#">about us</a>
-                  <a href="/#">contact</a>
+                  <button className='complaintButton' onClick={()=>window.location.href="/reports"}> VIEW REPORTS</button>
                   <button className='complaintButton' onClick={viewComplaints}> VIEW COMPLAINTS</button>
                   <button className='complaintButton' onClick={openNewRegistrationsList}> NEW REGISTRATIONS </button>
                 </nav>
@@ -689,7 +802,7 @@ function App()
                         <DropdownItem img = {logout} text = {"Logout"} onClick={()=>{
                             openModal("Logging out...")
                             setTimeout(() => {
-                                window.location.href='/login'
+                                window.location.href='/home'
                             }, 2000);
                             }}/>
                     </ul>
@@ -761,7 +874,7 @@ function App()
             onClick={(event) => addMarker(event.latLng)}>
 
         <Link to='#' className='menu-bars' style={{zIndex:10}}>
-            <i className='fas fa-bars' onClick={showSidebar} style={{color: 'blueviolet',marginLeft:1300,marginTop:28,zIndex:11,position:'absolute'}}/>
+            <i className='fas fa-bars' onClick={showSidebar} style={{color: 'blueviolet',zIndex:11,position:'relative',right:"-96%",top:"3%"}}/>
             
           </Link>
         <nav className={sidebar ? 'nav-menu active' : 'nav-menu'}>
@@ -769,22 +882,20 @@ function App()
             <li className='navbar-toggle'>
               <Link to='#' className='menu-bars'>
                 {/* <AiIcons.AiOutlineClose /> */}
-                <i className='far fa-circle-xmark' onClick={showSidebar} style={{color: 'blueviolet',zIndex:100}}/>
+                <i className='far fa-circle-xmark' onClick={showSidebar} style={{color: 'blueviolet',zIndex:100,position:'relative',left:'-40%'}}/>
               </Link>
             </li>
             {/* Drawing options */}
-            <div style={{zIndex:100000}}>
             {SidebarData.map((item, index) => {
               return (
-                <li key={index} className={item.cName}>
-                  <Link onClick={item.onclick}>
+                <li key={index} className={item.cName + ' ' + item.contentClassName} name={item.content}>
+                  <Link onClick={item.onclick}  >
                     {/* <span>{item.title}</span> */}
-                    <img src={item.img} title={item.title} />
+                    <img src={item.img}   />
                   </Link>
                 </li>
               );
             })} 
-            </div>
           </ul>
         </nav>
             
@@ -930,7 +1041,7 @@ function App()
                 <div>
                 <h3>RESERVOIR INFORMATION</h3>
                 <p>Water Quantity: {waterQuantity}</p>
-                <Button onClick={handleSupplyWater}>Supply Water</Button>
+                {/* <Button onClick={SupplyWaterQuantity}>Supply Water</Button> */}
                 </div>
             </InfoWindow>
             )}
@@ -951,10 +1062,10 @@ function App()
             {/* Modal for displaying New Registrations */}
             <Modal isOpen={newRegModal} onClose={() => setNewRegModal(false)} blockScrollOnMount={false}>
                  <ModalOverlay />
-                     <ModalContent bg="white" border="1px solid" borderRadius="5px" p={10} top={70} left="30%" boxSize="40%">
+                     <ModalContent bg="white" border="1px solid" borderRadius="5px" p={10} top={85} left="30%" boxSize="42%">
                          {/* <ModalHeader>Success!</ModalHeader> */}
                          <ModalCloseButton style={{marginLeft:'97%',backgroundColor:'ButtonFace',color: 'ButtonText', border: 'ButtonShadow'}} />
-                        <ModalBody>
+                        <ModalBody style={{overflowY:'auto',maxHeight:'80vh'}}>
                            {newRegModalContent.body}
                         </ModalBody>
                    </ModalContent>
@@ -962,10 +1073,10 @@ function App()
             {/* Modal for viewing Complaints */}
             <Modal isOpen={complaintsModal} onClose={() => setComplaintsModal(false)} blockScrollOnMount={false}>
                 <ModalOverlay />
-                    <ModalContent bg="white" border="1px solid" borderRadius="5px" p={10} top={70} left="20%" boxSize="60%" style={{height:"75%"}}>
+                    <ModalContent bg="white" border="1px solid" borderRadius="5px" p={10} top={70} left="20%" boxSize="62%" style={{height:"75%"}}>
                         {/* <ModalHeader>Success!</ModalHeader> */}
                         <ModalCloseButton style={{marginLeft:'97%',backgroundColor:'ButtonFace',color: 'ButtonText', border: 'ButtonShadow'}} />
-                    <ModalBody style={{overflowY:'auto',maxHeight:'85vh'}}>
+                    <ModalBody style={{overflowY:'auto',maxHeight:'75vh'}}>
                     <h1 style={{textAlign:"center"}}>ACTIVE COMPLAINTS</h1>
                     <hr style={{marginTop:10,marginBottom:20,border:"1px solid"}}/>
                     {complaintsModalContent.length>0 && complaintsModalContent.map((complaint, index) => (

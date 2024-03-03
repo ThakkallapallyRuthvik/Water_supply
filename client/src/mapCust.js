@@ -3,7 +3,7 @@ import { useJsApiLoader, GoogleMap, Marker, Polyline, InfoWindow, StandaloneSear
 import {Flex,Box,HStack,Button,ButtonGroup,Modal,ModalOverlay,ModalContent,ModalHeader,ModalBody,ModalCloseButton} from "@chakra-ui/react";
 import * as FaIcons from 'react-icons/fa';
 import * as AiIcons from 'react-icons/ai';
-import { Link } from 'react-router-dom';
+import { Link, useSubmit } from 'react-router-dom';
 import { IconContext } from 'react-icons';
 import { useRef } from "react";
 import GreenHouseMarker from './greenhousemarker.jpeg'
@@ -11,7 +11,7 @@ import RedHouseMarker from './redhousemarker.jpeg'
 import junctionmarker from './junctionmarker.jpeg'
 import waterreservoir from './waterreservoir.jpeg'
 import treatmentplant from './watertreatmentplant.png'
-import bg from './bg.jpg'
+import bg from './home_bg2.png'
 import user from './img/user.png';
 import edit from './img/edit.png';
 import inbox from './img/envelope.png';
@@ -67,7 +67,9 @@ function App()
     const [ ID, setID ] = useState('')
     let [ markerFunction, setMarkerFunction ] = useState(0)
     const [waterQuantity, setWaterQuantity] = useState(1000)
-    const [ description, setDescription ] = useState('')
+    let [ description, setDescription ] = useState('')
+    const [ othercomplaint, setOtherComplaint ] = useState('')
+    const [ reqdWater, setReqdWater ] = useState('')
     const [ isHovered, setIsHovered ] = useState(false)
     const [sidebar, setSidebar] = useState(false);
     const showSidebar = () => setSidebar(!sidebar);
@@ -390,17 +392,32 @@ function App()
 
     }
 
+    // useEffect(() => {
+    //     console.log("updated : ",description)
+    // },[description,reqdWater])
+
     async function submitComplaints(event){
         event.preventDefault()
+        let requestBody;
+        if (description=="Need extra water"){
+            const newDescription = description + " " + reqdWater + " litres"
+            requestBody = {description:newDescription}
+            // setDescription(newDescription)
+            // console.log(description)
+            // console.log(reqdWater)
+            // console.log(newDescription)
+            // console.log(description)
+        }
+        else{
+            requestBody = {description:description}
+        }
         try{
         const response = await fetch('http://localhost:5000/api/mapCust/:ID',{
             method:'POST',
             headers:{
                 'Content-Type':'application/json'
             },
-            body: JSON.stringify({
-                description,
-            }),
+            body: JSON.stringify(requestBody),
         })
         const data = await response.json()
         console.log(data)
@@ -429,10 +446,7 @@ function App()
         <img src={logo} style={{width:70,height:70,position:'absolute',left:'10px'}}/>
           <header>
                 <nav ref={navRef}>
-                  <a href="/#">about us</a>
-                  <a href="/#">contact</a>
-                  <button className='complaintButton' onClick={requestWater}> REQUEST EXTRA WATER</button>
-                  <button className='complaintButton' onClick={()=>setComplaintsModal(true)}> RAISE A COMPLAINT</button>
+                  <button className='complaintButton' onClick={()=>setComplaintsModal(true)} style={{marginRight:70}}> RAISE A COMPLAINT</button>
                 </nav>
               </header>
               {/* Profile */}
@@ -454,7 +468,7 @@ function App()
                         <DropdownItem img = {logout} text = {"Logout"} onClick={()=>{
                             openModal("Logging out...")
                             setTimeout(()=>{
-                                window.location.href="/login"
+                                window.location.href="/home"
                             },2000)
                             }}/>
                     </ul>
@@ -466,7 +480,7 @@ function App()
         </div>
         
     </IconContext.Provider>
-        {map && (
+        {/* {map && (
                 <StandaloneSearchBox
                 onLoad={(ref) => {setSearchBox(ref)}}
                 onPlacesChanged={onPlacesChanged}
@@ -490,7 +504,7 @@ function App()
                     }}
                 />
                 </StandaloneSearchBox>
-            )}
+            )} */}
         <Flex 
         position="relative"
         flexdirection="column"
@@ -583,8 +597,11 @@ function App()
                     <p style={{fontSize:15}}> house number : <strong>{housecoords[selectedhouseMarker].CANID}</strong></p>
                     <p style={{fontSize:15}}>USERID:<strong>{housecoords[selectedhouseMarker].userid}</strong></p>
                     <p style={{fontSize:15}}>
-                        Water Supply status:{' '}
-                        <button style={{
+                        Water Supply status:<strong>{housecoords[selectedhouseMarker].waterSupplied
+                                ? 'YES'
+                                : 'NO'}
+                                </strong>
+                        {/* <button style={{
                                 color: isHovered ? 'rgb(74, 72, 205)' : 'black',
                                 marginLeft: 5,
                             }}
@@ -595,10 +612,10 @@ function App()
                             {housecoords[selectedhouseMarker].waterSupplied
                                 ? 'YES'
                                 : 'NO'}
-                        </button>
+                        </button> */}
                     </p>
-                    <p style={{fontSize:15}}> Junction to house : {housecoords[selectedhouseMarker].assignedJunction}</p>
-                    <ButtonGroup>
+                    <p style={{fontSize:15}}> Junction to house : <strong>{housecoords[selectedhouseMarker].assignedJunction}</strong></p>
+                    {/* <ButtonGroup>
                         <button style={{
                                 color: isHovered ? 'rgb(74, 72, 205)' : 'black',
                                 marginLeft: 5,
@@ -608,8 +625,8 @@ function App()
                             onClick={() => assignJunctionToHouse(housecoords[selectedhouseMarker])}>
                         ASSIGN JUNCTION
                         </button>
-                    </ButtonGroup>
-                    {selectedHouseForJunction === housecoords[selectedhouseMarker] && (
+                    </ButtonGroup> */}
+                    {/* {selectedHouseForJunction === housecoords[selectedhouseMarker] && (
                         <div>
                             <h4>Select a Junction</h4>
                             <ButtonGroup>
@@ -620,7 +637,7 @@ function App()
                                 ))}
                             </ButtonGroup>
                         </div>
-                    )}
+                    )} */}
 
                 </div>
                 </InfoWindow>
@@ -635,17 +652,20 @@ function App()
                 {/* Add your content for the InfoWindow */}
                 <div>
                     <h3>JUNCTION INFORMATION</h3>
-                    <p> Junction number : {junctioncoords[selectedjunctionMarker].JID}</p>
-                    <p> Houses under junction : {junctioncoords[selectedjunctionMarker].houses.join(', ')}</p>
+                    <p> Junction number : <strong>{junctioncoords[selectedjunctionMarker].JID}</strong></p>
+                    <p> Houses under junction : <strong>{junctioncoords[selectedjunctionMarker].houses.join(', ')}</strong></p>
                     <p> 
-                        Water supply status:{' '}
-                        <button
+                        Water supply status:<strong>{junctioncoords[selectedjunctionMarker].waterSupplied
+                                ? 'YES'
+                                : 'NO'}
+                                </strong>
+                        {/* <button
                             onClick={() => toggleJunctionWaterSupply(selectedjunctionMarker)}
                         >
                             {junctioncoords[selectedjunctionMarker].waterSupplied
                                 ? 'YES'
                                 : 'NO'}
-                        </button>
+                        </button> */}
                     </p>
                 </div>
                 </InfoWindow>
@@ -687,13 +707,35 @@ function App()
                 <br/>
                 <ModalBody>
                 <h3>Description : 
-                <input 
+                <select 
                     value={description}
                     onChange={(e)=>setDescription(e.target.value)}
                     placeholder='Enter Your Complaint'
                     type='text' 
                     style={{marginLeft:10,width:'70%',height:'50px'}}
-                    />
+                    >
+                    <option value="">--Select Your Complaint--</option>
+                    <option value="Water not supplied">Water not supplied</option>
+                    <option value="Water connection not given">Water connection not given</option>
+                    <option value="Need extra water">Need extra water</option>
+                    <option value="Others">Others</option>
+                </select>
+                <br/>
+                <br/>
+                {description=="Need extra water" && (
+                    <input value={reqdWater}
+                            onChange={(e) => setReqdWater(e.target.value)}
+                            placeholder='Enter quantity'
+                            type='text'
+                            style={{width:'30%',height:'20%'}} />
+                )}
+                {description=="Others" && (
+                    <input value={othercomplaint}
+                            onChange={(e) => setOtherComplaint(e.target.value)}
+                            placeholder='Enter your description'
+                            type='text'
+                            style={{width:'40%',height:'30%'}} />
+                )}
                 </h3>
                 <br/>
                 <br/>

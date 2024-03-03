@@ -1,6 +1,6 @@
 .requestForm > div:nth-child(1){
 
-    background-image: url('./home_bg 2.png');
+    background-image: url('./home_bg2.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -13,7 +13,7 @@
 
 .resetForm > div:nth-child(1){
 
-    background-image: url('./home_bg 2.png');
+    background-image: url('./home_bg2.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
