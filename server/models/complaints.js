@@ -6,8 +6,8 @@ const complaints = new mongoose.Schema(
         // HouseID:String,
         description:String,
         status:String,
-        datecomplained:Date,
-        dateresolved:Date,
+        datecomplained:String,
+        dateresolved:String,
     },
     {collection:"complaints"}
     )

@@ -9,6 +9,7 @@ const coordinates = new mongoose.Schema(
             userid : {type:String},
             hcoords : { type: Object },
             waterSupplied : {type: Boolean },
+            Hquantity:{type:Number},
             assignedJunction : { type: String },
         }],
         // junctions : {type:Array,required:true},
@@ -19,6 +20,7 @@ const coordinates = new mongoose.Schema(
             waterSupplied :{type:Boolean},
         }],
         waterReservoirCoords : {type:Array , required:true},
+        waterTreatmentplantCoords : {type:Array, required:true}
     },
     {collection:'coordinatesDB'}
 )
