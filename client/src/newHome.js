@@ -212,24 +212,26 @@ function Home(){
             <a style={{gridColumn: '9', gridRow: '1', placeSelf: 'center'}}>View</a>
             <main className="flexparent">
                 <section className="flexchild" id="loginMain">
-                    <p style={{color: 'white'}}>Sign In as a citizen or continue as a surveyor</p>
+                <i className="fas fa-lock" style={{fontSize: '2rem'}}></i>
+                    <p style={{color: 'black', fontSize: '1.1rem'}}>Sign In as a citizen or continue as a surveyor</p>
                     <button tabIndex='-1' className="toggle" 
                         onClick={() => {toggleLogin()}}
                         type="button">
 
-                        <i className="fas fa-lock" />
+                        <i className="fas fa-lock-open" />
                         <p>Login</p>
                         
                     </button>
                 </section>
 
                 <section className="flexchild" id="signupMain">
-                    <p style={{color: 'white'}}>Register for our mapping tool or Sign up as a citizen</p>
+                    <i className="fas fa-pencil" style={{fontSize: '2rem'}}></i>
+                    <p style={{color: 'black', fontSize: '1.1rem'}}>Register for our mapping tool or Sign up as a citizen</p>
                     <button tabIndex='-1' className="toggle" 
                         onClick={() => {toggleSignup()}}
                         type="button">
 
-                        <i className="fas fa-pencil" />
+                        <i className="fas fa-pen" />
                         <p>Sign Up</p>
 
                     </button>
@@ -238,14 +240,16 @@ function Home(){
 
             <form onSubmit={loginUser} className="login" id="loginForm">
                 <button tabIndex='-1' onClick={()=>{toggleLogin()}} type="button">
-                    <i className="fas fa-arrow-left"/>
+                    <i className="fas fa-arrow-left" style={{cursor: 'pointer'}}/>
                 </button>
 
                 <h1 style={{gridRow: '1', gridColumn: '2/5', placeSelf: 'center', fontSize: '2.5rem', }}>Login</h1>
 
-                <i className="fas fa-user" style={{fontSize: '1.5rem', position: 'absolute', top: '29%', left: '17%'}} />
-                <i className="fas fa-key" style={{fontSize: '1.5rem', position: 'absolute', top: '56%', left: '17%', color: 'white'}} />
-                <a onClick={()=>window.location.href='/requestPasswordReset'} style={{gridRow: '4', gridColumn: '3/5', justifySelf: 'end', alignSelf: 'center', fontSize: '0.96rem', position: 'relative', zIndex: '1'}}>Forgot password?</a>
+                <div style={{display: 'flex', flexDirection: 'column', gridRow: '2/6', gridColumn: '1/2', justifyContent: 'space-evenly', alignItems: 'center', transform: 'translateY(-16%) translateX(50%)'}}>
+                <i className="fas fa-user" style={{fontSize: '1.5rem', position: 'relative'}} />
+                <i className="fas fa-key" style={{fontSize: '1.5rem', position: 'relative'}} />
+                </div>
+                <a onClick={()=>window.location.href='/requestPasswordReset'} style={{gridRow: '4', gridColumn: '3/5', justifySelf: 'end', alignSelf: 'center', fontSize: '0.96rem', position: 'relative', zIndex: '1', cursor: 'pointer', fontWeight: 'bold', transform: 'translateX(10%) translateY(20%)'}}>Forgot password?</a>
                 <div className="loginInput">
 
                     <input tabIndex='-1' type="text" placeholder="Email" 
@@ -265,7 +269,7 @@ function Home(){
 
             <form onSubmit={sendotp} className="register" id="signupForm">
                 <button tabIndex='-1' onClick={() =>{toggleSignup()}} type="button" >
-                    <i className="fas fa-arrow-left"></i>
+                    <i className="fas fa-arrow-left" style={{cursor: 'pointer'}}></i>
                 </button>
 
                 <h1 style={{gridRow: '1', gridColumn: '4/6', justifySelf: 'center', fontSize: '3rem'}}>Register</h1>
@@ -309,9 +313,9 @@ function Home(){
 
                 </div>
                 {role=="Customer" && (
-                      <div  style={{gridRow: '5', gridColumn: '6/10', placeSelf: 'center'}}>
+                      <div  style={{gridRow: '5', gridColumn: '6/10', placeSelf: 'center', transform: 'translateX(20%)'}}>
                         <input 
-                        className="hello"
+                        className="addressInput"
                         value={add}
                         onChange={(e)=>setAdd(e.target.value)}
                         placeholder='Enter Address'
@@ -320,25 +324,24 @@ function Home(){
                       </div> 
                     )}
                 <div className="otpInput">
-                    <button tabIndex='-1' type="button" onClick={registerUser}>
-                        <p>Get OTP</p>
+                    <button tabIndex='-1' type="button" onClick={registerUser} className="otpButton">
+                        Get OTP
                     </button>
                     <input 
-                        className="hello"
+                        type='text'
                         value={otp}
                         onChange={(e)=>setOtp(e.target.value)}
                         placeholder='Enter OTP'
+                        disabled={disable?false:true}
+                        className={`otpBox${disable?'Enable':'Disable'}`}
                         />
-                    <button type="submit" value="Register">Register</button>
-                </div>
+                    </div>
+                    <button type="submit" value="Register" style={{gridColumn: '7', gridRow: '9/11'}}>Register
+                    <i className="fas fa-arrow-right" 
+                      style={{marginLeft: '10px'}} />
+                </button>
                 <br/>
                 <br/>
-                {/* <div className="otpInput">
-                    <input type="text" value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
-                    placeholder="Enter OTP"
-                    disabled={disable?false:true} />
-                </div> */}
                 <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} blockScrollOnMount={false} >
                     <ModalOverlay />
                         <ModalContent bg="white" border={modalContent.border} borderRadius="5px" p={4} top={60} left="40%" boxSize="18%" >

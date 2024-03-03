@@ -1,3 +1,4 @@
+
 :root{
     --textColor : white;
 
@@ -21,13 +22,66 @@
 
 .leftbar{
 
+    position: relative;
+    /* z-index: -2; */
     grid-row: 1/11;
     grid-column: 1;
     background-image: url('./home_bg2.png');
-    background-position: 0%;
+    background-position: 30%;
     /* transform: translateX(-15%); */
     /* transition: translate 0.5s ease-in-out; */
 }
+
+.leftbar::before{
+
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(255, 255, 255, 0.05);
+}
+
+
+.leftbar > button{
+
+    position: relative;
+    cursor: pointer;
+    z-index: 1;
+    width: 50%;
+    height: 5%;
+    background-color: rgb(255, 255, 255, 0);
+    border: none;
+    transform: translateX(45%) translateY(50%);
+}
+
+.leftbar > button::before{
+
+    --size: 0;
+
+    position: absolute;
+    content: "Back to Map";
+    font-size: 1.1em;
+    font-weight:bolder;
+    width: max-content;
+    transform: translateY(350%) translateX(-25%) scale(var(--size));
+    transition: 150ms transform;
+
+    transform-origin:top;
+}
+
+.leftbar > button:hover::before{
+    
+    --size: 1;
+}
+
+
+.leftbar > button > i{
+
+    font-size: 3.5em;
+    transform: rotate(-90deg);
+}
+
+
 
 .calendarWrap{
 
@@ -106,16 +160,12 @@
     height: 120%;
     grid-column: 2/7;
     justify-self: center;
-
+    transform: translateX(-10.5%);
     border-radius: 10px;
     padding: 0%;
     /* margin-top: 15%; */
 
       
-}
-
-.reports-main::-webkit-scrollbar{
-    width: 0;
 }
 .reports-table{
 

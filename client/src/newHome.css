@@ -19,7 +19,9 @@
 
 .home > a{
 
-    backdrop-filter: blur(4px);
+    font-size: 1.2em;
+    font-weight: 800;
+    cursor: pointer;
 }
 
 .flexparent{
@@ -27,7 +29,7 @@
     display: flex;
     flex-direction: row;
     position: relative;
-    grid-row: 6/10;
+    grid-row: 5/9;
     grid-column: 3/9;
     justify-content: space-around;
     /* align-items: center ; */
@@ -36,7 +38,8 @@
 
 .flexchild{
 
-    border: 2px solid black;
+    /* border: 2px solid black; */
+    box-shadow: 3px 3px 17px black, -3px -5px 17px black;
     border-radius: 5%;
     width: 20vw;
     
@@ -44,13 +47,17 @@
     /* flex-wrap: wrap; */
     text-align: center;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-evenly;
     align-items: center;
 
     backdrop-filter: blur(6px);
+    background-color: rgb(255, 255, 255, 0.15);
 
     transition: transform 1s ease-in-out;
 
+    padding: 1vw;
+
+    font-weight: bold;
 }
 
 .toggle{
@@ -73,15 +80,62 @@
     outline: none;
 }
 
+.login input[type='submit']{
 
-.toggle:hover{
+    width: 60%;
+    height: 10%;
+    border-radius: 15px;
+    background-color: rgb(74, 74, 201);
+    font-size: 1.2rem;
+    font-family: 'One Day';
+    border: 5px solid midnightblue;
+    padding: 2px;
+    color: azure;
+    transition: transform 0.3s ease-in-out;   
+    margin: 0;
+    outline: none;
+}
 
-    transform: scale(1.2);
+.register button[type='submit']{
+
+    align-self: center;
+    height: 50%;
+    border-radius: 15px;
+    background-color: rgb(74, 74, 201);
+    font-size: 1.2rem;
+    font-family: 'One Day';
+    border: 5px solid midnightblue;
+    padding: 2px;
+    color: azure;
+    transition: transform 0.2s ease-in-out;   
+    margin: 0;
+    outline: none;
+}
+
+.otpButton{
+
+    height: 35%;
+    align-items: center;
+    border-radius: 15px;
+    background-color: rgb(74, 74, 201);
+    font-size: 1.2rem;
+    font-family: 'One Day';
+    border: 5px solid midnightblue;
+    padding: 5px;
+    color: azure;
+    transition: transform 0.3s ease-in-out;   
+    margin: 0;
+    outline: none;
+}
+
+.toggle:hover, .register button[type='submit']:hover, .loginInput input[type='submit']:hover, .otpButton:hover{
+
+    transform: scale(1.15);
     background-color: midnightblue;
 
 }
 
-.toggle:active{
+.toggle:active, .register button[type='submit']:active, .loginInput input[type='submit']:active, .otpButton:active{
 
     border: 3px solid black;
     color: black;
@@ -138,9 +192,15 @@
     position: relative;
 
     backdrop-filter: blur(4px);
+    background-color: rgba(255, 255, 255, 0.3);
 
     box-shadow: 3px 3px 17px black, -3px -5px 17px black;
     box-shadow: 3px 3px 17px black, -3px -5px 17px black;
+}
+
+.login h1{
+
+    color: rgb(4, 4, 66);
 }
 
 .login input::placeholder{
@@ -188,9 +248,28 @@
 
 }
 
+.loginInput i {
+    color: azure;
+    font-size: 1.5rem;
+    position: absolute;
+    top: 83%;
+    right: 18%;
+    transition: 0.3s ease-in-out;
+}
+
+.loginInput input[type='submit']:hover +  i, .register button[type='submit']:hover +  i{
+
+    transform: scale(1.2) translateY(10%) translateX(20%);
+}
+
+.loginInput input[type='submit']:active +  i, .register button[type='submit']:active +  i{
+
+    color: azure;
+}
+
 .loginInput >input:nth-child(2)::placeholder{
 
-    color: white;
+    color: black;
 }
 /* 
 .loginIcons{
@@ -209,7 +288,7 @@
     width: 54%;
     height: 15%;
     outline: none;
-    border: 1px solid black ;
+    border: 3px solid black ;
     border-radius: 15px;
     /* text-indent: 15%; */
     font-size: .96rem;
@@ -224,7 +303,7 @@
     height: 15%;
     border-radius: 15px;
     font-size: 1.2rem;
-    border: 3px solid black;
+    /* border: 3px solid black; */
     font-weight: 900;
 }
 
@@ -255,9 +334,9 @@
     grid-template-columns: repeat(8, 10vw);
     grid-template-rows: repeat(10, 8vh);
 
-    background-color: rgb(255, 255, 255, 0);
+    background-color: rgb(255, 255, 255, 0.05);
 
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(6px);
 
 }
 
@@ -307,8 +386,8 @@
 
     width: 60%;
     height: 11%;
-    border: 1px solid black;
-    background-color: transparent;
+    border: 3px solid black;
+    background-color: rgb(255, 255, 255, 0.25);
     border-radius: 15px;
     padding: 0 6% 0 9%;
     font-size: 0.96rem;
@@ -341,6 +420,40 @@
     grid-column: 6/10;
     justify-content: space-around;
     align-items: center;
+
+}
+
+.otpBoxEnable, .otpBoxDisable{
+
+    border: 3px solid black;
+    border-radius: 12px;
+    height: 20%;
+    text-align: center;
+    color: white;
+    background-color: rgb(255, 255, 255, 0.25);
+    font-weight: bold;
+    font-size: 0.96rem;
+    width: 25%;
+
+
+}
+
+.otpBoxDisable{
+    border: 1px solid black;
+    cursor:not-allowed;
+}
+
+.addressInput{
+
+    border: 3px solid black;
+    border-radius: 12px;
+    height: 20%;
+    text-align: center;
+    color: white;
+    background-color: rgb(255, 255, 255, 0.25);
+    font-weight: bold;
+    font-size: 0.96rem;
+    width: 60%;
 
 }
 

@@ -90,6 +90,9 @@ function Report(){
             </button>
 
             <div className="leftbar">
+            <button onClick={()=>window.location.href='/mapDepartment'}>
+                    <i className="fas fa-arrow-turn-up" ></i>
+                </button>
             </div>
             <div className="calendarWrap">
 
